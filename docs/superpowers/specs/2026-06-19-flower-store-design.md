@@ -9,7 +9,7 @@
 
 ## 🏛️ 1. Architectural Approach
 
-We propose a **Fully Integrated Next.js Full-Stack Monolith** (Approach 1) as the optimal design. It minimizes deployment complexity, eliminates cross-origin security concerns, provides a unified codebase with shared types, and delivers the highest performance.
+We propose a **Fully Integrated Next.js Full-Stack Monolith** (Approach 1) as the optimal design. On the client-side, the storefront operates as a fluid, high-performance **Single Page Application (SPA)**. Once the initial document shell is loaded, all subsequent navigations, product filtrations, and custom bouquet building steps are executed instantly via client-side routing and in-memory client states, minimizing layout reflows and eliminating full-page reloads. This monolith structure minimizes deployment complexity, eliminates cross-origin security concerns, provides a unified codebase with shared types, and delivers the highest performance.
 
 ### 🏢 Feature-Sliced Design (FSD) Structure
 To maintain excellent modularity, decoupling, and high scalability, the codebase adheres strictly to **Feature-Sliced Design (FSD)** guidelines. The files are organized as follows:
@@ -358,23 +358,39 @@ Before confirming an order:
 
 ## 🎨 6. Webhooks & Integrations
 
-### Webhook Route Handler (`app/api/webhook/route.ts`)
-Listens to success payloads from PayOS, Momo, or Stripe. It updates the database transactionally:
+Our project integrates highly reliable, production-tested third-party APIs for processing payments and routing instant system/admin alerts.
+
+### 💳 1. Payment Gateway: PayOS + Stripe Integration
+To maximize checkout success rates and cater to both domestic and international customers, we support two payment mechanisms:
+
+*   **PayOS (Primary for Local Market)**: Free open-source payment gateway by Cassso. Used for automatic, instant banking QR-code generation (NAPAS 247). Webhooks will receive payload updates directly, offering a 0% transaction fee.
+*   **Stripe (Secondary/Global)**: Easiest developer-first credit card gateway setup. Excellent for international gift-givers, secured via Stripe Webhooks.
+
+#### Webhook Route Handler (`app/api/webhook/route.ts`)
+Listens to transaction success payloads. It updates the database transactionally to prevent double-spending or race conditions:
+
 ```typescript
 export async function POST(request: Request) {
   const payload = await request.json();
-  const signature = request.headers.get("x-signature");
+  const signature = request.headers.get("x-signature") || request.headers.get("stripe-signature");
 
-  // 1. Verify signatures 
-  // 2. Locate order in DB matching transactional code
+  // 1. Verify signatures (PayOS secret or Stripe webhook signing secret)
+  // 2. Locate order in DB matching transactional code (orderNumber)
   // 3. Complete transaction: update Order to CONFIRMED, update PaymentStatus to PAID
   // 4. Deduct raw stem stocks based on recipe formula or custom bouquet stem list
-  // 5. Send Telegram notification & confirmation email
+  // 5. Trigger customer invoice email (Resend) & admin notify (Telegram)
 }
 ```
 
-### Discord / Telegram Bot Notification
-A lightweight notification utility triggered in Server Actions or Webhooks to push order details instantly to the admin's messaging channel:
+### 🔔 2. Automated Notification System
+Our system handles real-time alerts for both internal store operations (Admin) and external clients (Customers).
+
+*   **Telegram Bot Webhook (Admin Alerts)**: Used for instant mobile alerts when a new order is received, a payment is finalized, or flower stem stocks drop below critical thresholds.
+*   **Resend / React Email (Customer Invoices)**: High-performance email dispatching (free tier: 3,000 emails/month) using `@react-email/components` to deliver clean, custom transactional HTML receipt cards, order summaries, and delivery reminders.
+
+#### Telegram Bot Notification Utility
+A lightweight notification helper called within our webhooks or Server Actions:
+
 ```typescript
 export async function sendAdminNotification(orderNumber: string, amount: number) {
   const message = `🌸 *New Order Placed!*\nOrder: #${orderNumber}\nAmount: ${amount.toLocaleString()} VND`;
