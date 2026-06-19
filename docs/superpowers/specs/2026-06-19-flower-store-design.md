@@ -11,6 +11,16 @@
 
 We propose a **Fully Integrated Next.js Full-Stack Monolith** (Approach 1) as the optimal design. It minimizes deployment complexity, eliminates cross-origin security concerns, provides a unified codebase with shared types, and delivers the highest performance.
 
+### 🏢 Feature-Sliced Design (FSD) Structure
+To maintain excellent modularity, decoupling, and high scalability, the codebase adheres strictly to **Feature-Sliced Design (FSD)** guidelines. The files are organized as follows:
+
+*   **`app/`**: Global initialization, styles, and routing entrypoints. Holds global Zustand stores and layouts.
+*   **`pages/`**: Full route pages composed from widgets, features, and entities.
+*   **`widgets/`**: Large self-contained UI blocks (e.g., `Header`, `ProductCatalogGrid`, `AdminSidebar`, `OrderManager`).
+*   **`features/`**: User actions with business value (e.g., `AddToCart`, `CheckoutForm`, `CustomBouquetStepWizard`, `CardMessageSelector`).
+*   **`entities/`**: Core domain logic and dumb data structures (e.g., `ProductCard`, `OrderItemRow`, `UserAvatar`, `StemStockAlert`).
+*   **`shared/`**: Reusable infrastructure components, assets, utilities, and integrations (e.g., shadcn components, tailwind config, prisma client instance, payment helper utilities).
+
 ### System Overview Diagram
 
 ```
@@ -40,9 +50,9 @@ We propose a **Fully Integrated Next.js Full-Stack Monolith** (Approach 1) as th
 
 ---
 
-## 💾 2. Enhanced Database Schema (Prisma)
+## 💾 2. Enhanced Database Schema (Prisma with PostgreSQL)
 
-We will expand `prisma/schema.prisma` to cover all storefront and admin requirements.
+We will expand `prisma/schema.prisma` to cover all storefront and admin requirements. By using **Prisma with PostgreSQL**, the system takes full advantage of robust database transactions, relation integrity cascades, fast indexing on slug fields, and custom enum types (`UserRole`, `CouponType`, `OrderStatus`, `PaymentStatus`).
 
 ```prisma
 datasource db {
