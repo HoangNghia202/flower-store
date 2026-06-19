@@ -1,4 +1,4 @@
-# Flower Store Implementation Plan (FSD, Shadcn, Auth & Layout)
+﻿# Flower Store Implementation Plan (FSD, Shadcn, Auth & Layout)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -18,15 +18,17 @@
 
 ---
 
-### Task 1: Root Layout Setup & Authentication Login Page
+### Task 1: Root Layout Setup & Authentication Pages (Login & Register)
 
 **Files:**
 - Modify: `app/layout.tsx` (wrap with layout context, global fonts, responsive styling)
-- Create: `app/(auth)/login/page.tsx` (sign-in credential form and Google OAuth trigger)
+- Create: `app/(auth)/login/page.tsx` (sign-in credential form with register link and Google OAuth trigger)
+- Create: `app/(auth)/register/page.tsx` (sign-up form with name, email, password fields)
+- Create: `app/actions/register.ts` (Next.js 16 Server Action for secure user registration with Prisma)
 
 **Interfaces:**
-- Consumes: `auth.ts` config exports.
-- Produces: Dynamic global root layout, secure login gateway `/login`.
+- Consumes: `auth.ts` config exports, Prisma client.
+- Produces: Dynamic global root layout, secure login gateway `/login`, registration form `/register`, server action `registerUser`.
 
 - [ ] **Step 1: Implement global styling & providers in `app/layout.tsx`**
 
@@ -68,7 +70,50 @@ export default function RootLayout({
 }
 ```
 
-- [ ] **Step 2: Implement `/app/(auth)/login/page.tsx`**
+- [ ] **Step 2: Implement `/app/actions/register.ts` Server Action**
+
+```tsx
+"use server";
+
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+export async function registerUser(formData: FormData) {
+  const name = formData.get("name") as string;
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  if (!email || !password) {
+    return { error: "Email and password are required" };
+  }
+
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return { error: "An account with this email already exists" };
+    }
+
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password, // Stored matching current authorize credential flow check
+        role: "CUSTOMER",
+      },
+    });
+
+    return { success: true };
+  } catch (err: any) {
+    return { error: err.message || "Failed to register user" };
+  }
+}
+```
+
+- [ ] **Step 3: Implement `/app/(auth)/login/page.tsx`**
 
 ```tsx
 "use client";
@@ -142,6 +187,12 @@ export default function LoginPage() {
             <Button type="submit" className="w-full bg-rose-600 text-white hover:bg-rose-700">
               Sign In with Email
             </Button>
+            <div className="text-center text-sm text-slate-500 mt-2">
+              Don't have an account?{" "}
+              <a href="/register" className="underline font-semibold text-rose-600 hover:text-rose-700">
+                Register
+              </a>
+            </div>
           </form>
 
           <div className="relative flex py-2 items-center">
@@ -170,16 +221,140 @@ export default function LoginPage() {
 }
 ```
 
-- [ ] **Step 3: Run build validation check**
+- [ ] **Step 4: Implement `/app/(auth)/register/page.tsx`**
+
+```tsx
+"use client";
+
+import * as React from "react";
+import { registerUser } from "@/app/actions/register";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+export default function RegisterPage() {
+  const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [error, setError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState<boolean>(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("password", password);
+
+    const result = await registerUser(formData);
+
+    if (result?.error) {
+      setError(result.error);
+    } else {
+      setSuccess(true);
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1500);
+    }
+  };
+
+  return (
+    <main className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
+      <Card className="w-full max-w-md shadow-lg border border-slate-200">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-black text-center text-rose-600">Create an Account</CardTitle>
+          <CardDescription className="text-center text-slate-500">Sign up to buy premium flower bouquets and customize designs</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {success ? (
+            <div className="text-center py-4 space-y-2">
+              <p className="text-sm font-semibold text-emerald-600 bg-emerald-50 p-3 rounded-lg border border-emerald-100">
+                Registration successful! Redirecting to login...
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <p className="text-sm font-semibold text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-100">
+                  {error}
+                </p>
+              )}
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700 block">Name</label>
+                <Input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your Name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700 block">Email</label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700 block">Password</label>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700 block">Confirm Password</label>
+                <Input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full bg-rose-600 text-white hover:bg-rose-700">
+                Register Account
+              </Button>
+              <div className="text-center text-sm text-slate-500 mt-2">
+                Already have an account?{" "}
+                <a href="/login" className="underline font-semibold text-rose-600 hover:text-rose-700">
+                  Sign In
+                </a>
+              </div>
+            </form>
+          )}
+        </CardContent>
+      </Card>
+    </main>
+  );
+}
+```
+
+- [ ] **Step 5: Run build validation check**
 
 Run: `npm run build`
 Expected: SUCCESS
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add app/layout.tsx app/\(auth\)/login/page.tsx
-git commit -m "feat: configure root layout wrapper and credentials + google login auth page"
+git add app/layout.tsx app/actions/register.ts app/\(auth\)/login/page.tsx app/\(auth\)/register/page.tsx
+git commit -m "feat: configure root layout wrapper, user registration server action, and login + register pages"
 ```
 
 ---
