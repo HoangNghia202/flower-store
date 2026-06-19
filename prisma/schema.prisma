@@ -1,0 +1,205 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+// 1. User management
+model User {
+  id            String                @id @default(cuid())
+  name          String?
+  email         String                @unique
+  password      String // Dùng cho Login truyền thống
+  role          UserRole              @default(CUSTOMER)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  orders        Order[]
+  addressBook   AddressBookEntry[]
+  reminders     AnniversaryReminder[]
+}
+
+// 2. Danh mục sản phẩm (Sinh nhật, Khai trương, Hoa Hồng...)
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+}
+
+// 3. Sản phẩm hoa mẫu
+model Product {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String
+  price       Float // Giá gốc hoặc giá size tiêu chuẩn
+  images      String[] // Mảng chứa các URL ảnh từ Cloudinary/S3
+  stock       Int           @default(0) // Số lượng bó sẵn có
+  isFeatured  Boolean       @default(false) // Hiển thị trang chủ
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  categoryId  String
+  category    Category      @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+  stems       ProductStem[] // Công thức cắm hoa từ các cành hoa raw
+}
+
+// 3.5. Cành hoa raw trong kho đông lạnh (Quản lý stem-level inventory)
+model Stem {
+  id          String              @id @default(cuid())
+  name        String              @unique // Tên cành hoa, vd: Red Rose, Yellow Tulip, Lily
+  color       String // Màu chủ đạo để filter
+  stock       Int                 @default(0) // Số lượng cành hiện có trong tủ bảo quản
+  criticalMin Int                 @default(10) // Ngưỡng cảnh báo sắp hết hoa
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  products    ProductStem[]
+  customItems CustomBouquetStem[]
+}
+
+// Bảng liên kết công thức cắm hoa
+model ProductStem {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  stemId    String
+  stem      Stem    @relation(fields: [stemId], references: [id], onDelete: Cascade)
+  quantity  Int // Số lượng cành cần dùng cho 1 bó mẫu
+
+  @@unique([productId, stemId])
+}
+
+// 4. Đơn hàng (Đặc thù ngành hoa)
+model Order {
+  id              String          @id @default(cuid())
+  orderNumber     String          @unique // Mã đơn hàng hiển thị cho khách (VD: FLW-123456)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  status          OrderStatus     @default(PENDING)
+  totalAmount     Float
+
+  // Thông tin người MUA
+  buyerName       String
+  buyerPhone      String
+  buyerEmail      String
+
+  // Thông tin người NHẬN (Đặc thù tặng quà)
+  recipientName   String
+  recipientPhone  String
+  recipientAddress String
+  isAnonymous     Boolean         @default(false) // Giao hàng ẩn danh
+
+  // Lời chúc và Thời gian giao (Đặc thù ngành hoa)
+  cardMessage     String? // Lời chúc in trên thiệp
+  deliveryDate    DateTime // Ngày giao hoa khách chọn
+  deliverySlot    String // Khung giờ giao (VD: "08:00 - 10:00")
+
+  // Thanh toán
+  paymentMethod   String // COD, VNPAY, MOMO, PAYOS
+  paymentStatus   PaymentStatus   @default(UNPAID)
+  paymentSessionId String? // ID session thanh toán để webhook tracking
+
+  // Quan hệ
+  userId          String? // Có thể null nếu khách mua không cần tài khoản (Guest Checkout)
+  user            User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items           OrderItem[]
+  customBouquets  CustomBouquet[]
+}
+
+// 5. Chi tiết sản phẩm trong đơn hàng
+model OrderItem {
+  id        String  @id @default(cuid())
+  quantity  Int
+  price     Float // Lưu giá tại thời điểm mua
+
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+// 6. Bó hoa tự thiết kế (Custom Bouquet) do khách tự chọn cành
+model CustomBouquet {
+  id        String              @id @default(cuid())
+  price     Float // Giá tổng của bó tự chế
+  quantity  Int                 @default(1)
+  wrapPaper String // Loại giấy gói chọn
+  ribbon    String // Loại ruy băng chọn
+  orderId   String
+  order     Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  stems     CustomBouquetStem[]
+}
+
+model CustomBouquetStem {
+  id              String        @id @default(cuid())
+  customBouquetId String
+  customBouquet   CustomBouquet @relation(fields: [customBouquetId], references: [id], onDelete: Cascade)
+  stemId          String
+  stem            Stem          @relation(fields: [stemId], references: [id])
+  quantity        Int // Số lượng cành khách chọn cho loại hoa này
+}
+
+// 7. Sổ địa chỉ (Lưu danh sách người nhận quà hay tặng)
+model AddressBookEntry {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label            String // Nhãn gợi nhớ, ví dụ: "Vợ yêu", "Mẹ", "Sếp"
+  recipientName    String
+  recipientPhone   String
+  recipientAddress String
+  createdAt        DateTime @default(now())
+}
+
+// 8. Nhắc nhở kỷ niệm
+model AnniversaryReminder {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title             String // Ví dụ: "Kỷ niệm ngày cưới", "Sinh nhật Vợ"
+  recipientName     String
+  date              DateTime // Ngày tháng kỷ niệm hàng năm
+  lastTriggeredYear Int? // Năm gần nhất đã gửi thông báo / code giảm giá
+  createdAt         DateTime @default(now())
+}
+
+// 9. Mã giảm giá (Coupon)
+model Coupon {
+  code         String     @id // Mã giảm giá, ví dụ: "HAPPYWOMANDAY"
+  discountType CouponType @default(PERCENTAGE)
+  value        Float // Giá trị giảm (Ví dụ 15 cho 15% hoặc 50000 cho 50k VND)
+  maxUses      Int? // Số lượt dùng tối đa (null nếu không giới hạn)
+  usedCount    Int        @default(0) // Số lượt đã dùng
+  active       Boolean    @default(true) // Trạng thái kích hoạt
+  expiresAt    DateTime? // Ngày hết hạn
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+}
+
+enum OrderStatus {
+  PENDING // Chờ xử lý
+  CONFIRMED // Đã xác nhận đơn
+  PROCESSING // Đang cắm hoa
+  DELIVERING // Đang giao
+  COMPLETED // Đã giao hoa thành công
+  CANCELLED // Đã hủy
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
