@@ -1,97 +1,185 @@
-# Flower Store Implementation Plan (Skip Testing Phase)
+# Flower Store Implementation Plan (FSD, Shadcn, Auth & Layout)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a complete full-stack Feature-Sliced Design flower store storefront and admin panel on Next.js 16, React 19, Prisma with PostgreSQL, and Zustand without automated test suites.
+**Goal:** Build a complete full-stack Feature-Sliced Design flower store storefront and admin panel on Next.js 16, React 19, Prisma with PostgreSQL, and Zustand.
 
-**Architecture:** Full-stack Next.js monolith with client-side SPA storefront. Business features are layered under FSD directories (shared, entities, features, widgets, pages, app).
+**Architecture:** Full-stack Next.js monolith with client-side SPA storefront. Business features are layered under FSD directories (shared, entities, features, widgets, pages, app). All UI components leverage the existing **Shadcn UI library** (imported directly from `@/components/ui/`).
 
-**Tech Stack:** Next.js 16, React 19, Zustand, Tailwind CSS v4, Auth.js v5, Prisma ORM, PostgreSQL.
+**Tech Stack:** Next.js 16, React 19, Zustand, Tailwind CSS v4, Auth.js v5, Prisma ORM, PostgreSQL, Shadcn UI.
 
 ## Global Constraints
 *   **Operating System**: Windows NT (use backslashes `\` for paths).
 *   **Next.js Version**: 16.2.9 (strictly async request-time parameters, proxy.ts instead of middleware.ts).
 *   **React Version**: 19.2.4 (uses `React.use` or Promises for async properties).
 *   **Tailwind CSS**: v4 (utility-first styles managed via `@tailwindcss/postcss`).
+*   **UI Components**: Use existing **Shadcn UI** components from `@/components/ui/` (do not scaffold custom UI components).
 *   **Linting**: Strict explicit-any rules (`@typescript-eslint/no-explicit-any` is disallowed).
 
 ---
 
-### Task 1: Core Shared Setup & Database Connection
+### Task 1: Root Layout Setup & Authentication Login Page
 
 **Files:**
-- Create: `shared/lib/prisma.ts`
-- Create: `shared/ui/Button.tsx`
-- Create: `shared/ui/Input.tsx`
+- Modify: `app/layout.tsx` (wrap with layout context, global fonts, responsive styling)
+- Create: `app/(auth)/login/page.tsx` (sign-in credential form and Google OAuth trigger)
 
 **Interfaces:**
-- Consumes: None
-- Produces: `db` Prisma client, `Button` UI component, `Input` UI component.
+- Consumes: `auth.ts` config exports.
+- Produces: Dynamic global root layout, secure login gateway `/login`.
 
-- [ ] **Step 1: Implement `shared/lib/prisma.ts`**
-
-```typescript
-import { PrismaClient } from "@prisma/client";
-
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
-
-export const db = globalForPrisma.prisma || new PrismaClient();
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
-```
-
-- [ ] **Step 2: Implement `shared/ui/Button.tsx`**
+- [ ] **Step 1: Implement global styling & providers in `app/layout.tsx`**
 
 ```tsx
-import * as React from "react";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline";
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Aura Bloom - Premium Flower Boutique",
+  description: "Exquisite flower arrangements and custom bespoke designs delivered instantly.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
+        <div className="flex-grow flex flex-col">{children}</div>
+      </body>
+    </html>
+  );
 }
+```
 
-export function Button({ variant = "primary", className = "", children, ...props }: ButtonProps) {
-  const baseStyle = "px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer disabled:opacity-50";
-  const variants = {
-    primary: "bg-rose-600 text-white hover:bg-rose-700",
-    secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200",
-    outline: "border border-slate-300 text-slate-700 hover:bg-slate-50",
+- [ ] **Step 2: Implement `/app/(auth)/login/page.tsx`**
+
+```tsx
+"use client";
+
+import * as React from "react";
+import { signIn } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+export default function LoginPage() {
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState<string | null>(null);
+
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setError("Invalid email or password. Please try again.");
+    } else {
+      window.location.href = "/";
+    }
+  };
+
+  const handleGoogleSignIn = () => {
+    signIn("google", { callbackUrl: "/" });
   };
 
   return (
-    <button className={`${baseStyle} ${variants[variant]} ${className}`} {...props}>
-      {children}
-    </button>
+    <main className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
+      <Card className="w-full max-w-md shadow-lg border border-slate-200">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-black text-center text-rose-600">Welcome to Aura Bloom</CardTitle>
+          <CardDescription className="text-center text-slate-500">Sign in to your account to save gift lists and track order dispatch</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form onSubmit={handleCredentialsSubmit} className="space-y-4">
+            {error && (
+              <p className="text-sm font-semibold text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-100">
+                {error}
+              </p>
+            )}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700 block">Email</label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700 block">Password</label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full bg-rose-600 text-white hover:bg-rose-700">
+              Sign In with Email
+            </Button>
+          </form>
+
+          <div className="relative flex py-2 items-center">
+            <div className="flex-grow border-t border-slate-200"></div>
+            <span className="flex-shrink mx-4 text-slate-400 text-xs uppercase">Or continue with</span>
+            <div className="flex-grow border-t border-slate-200"></div>
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full border border-slate-300 text-slate-700 flex items-center justify-center gap-2"
+            onClick={handleGoogleSignIn}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24">
+              <path
+                fill="currentColor"
+                d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.465 0-6.273-2.812-6.273-6.277s2.808-6.277 6.273-6.277c1.558 0 2.978.569 4.095 1.524l3.125-3.13C19.31 1.91 16.065 1 12.24 1 6.033 1 1 6.035 1 12.241S6.033 23.48 12.24 23.48c5.44 0 9.94-3.87 9.94-9.3 0-.583-.06-1.15-.175-1.7H12.24Z"
+              />
+            </svg>
+            Google OAuth Session
+          </Button>
+        </CardContent>
+      </Card>
+    </main>
   );
 }
 ```
 
-- [ ] **Step 3: Implement `shared/ui/Input.tsx`**
-
-```tsx
-import * as React from "react";
-
-export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
-
-export function Input({ className = "", ...props }: InputProps) {
-  return (
-    <input
-      className={`w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white ${className}`}
-      {...props}
-    />
-  );
-}
-```
-
-- [ ] **Step 4: Run build validation check**
+- [ ] **Step 3: Run build validation check**
 
 Run: `npm run build`
 Expected: SUCCESS
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add shared/lib/prisma.ts shared/ui/Button.tsx shared/ui/Input.tsx
-git commit -m "feat: add shared db client and baseline Button/Input UI components"
+git add app/layout.tsx app/\(auth\)/login/page.tsx
+git commit -m "feat: configure root layout wrapper and credentials + google login auth page"
 ```
 
 ---
@@ -103,13 +191,13 @@ git commit -m "feat: add shared db client and baseline Button/Input UI component
 - Create: `features/catalog-filter/ui/CatalogFilter.tsx`
 
 **Interfaces:**
-- Consumes: `Button` from `shared/ui/Button.tsx`
+- Consumes: `Button` from `@/components/ui/button`.
 - Produces: `ProductCard` component, `CatalogFilter` sidebar selector.
 
 - [ ] **Step 1: Implement `entities/product/ui/ProductCard.tsx`**
 
 ```tsx
-import { Button } from "@/shared/ui/Button";
+import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/app/store/useCartStore";
 
 export interface Product {
@@ -229,14 +317,14 @@ git commit -m "feat: add product card entity and sidebar catalog filter"
 - Create: `widgets/header/ui/Header.tsx`
 
 **Interfaces:**
-- Consumes: `useCartStore` from `app/store/useCartStore.ts`, `Button` from `shared/ui/Button.tsx`.
+- Consumes: `useCartStore` from `app/store/useCartStore.ts`, `Button` from `@/components/ui/button`.
 - Produces: `Header` layout widget with cart dropdown and dynamic item tally.
 
 - [ ] **Step 1: Implement `widgets/header/ui/Header.tsx`**
 
 ```tsx
 import { useCartStore } from "@/app/store/useCartStore";
-import { Button } from "@/shared/ui/Button";
+import { Button } from "@/components/ui/button";
 
 export function Header() {
   const totalItems = useCartStore((state) => state.getTotalItems());
@@ -253,7 +341,7 @@ export function Header() {
 
         <div className="flex items-center gap-4">
           <div className="relative group">
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2 border border-slate-300 text-slate-700 hover:bg-slate-50">
               🛒 Cart ({totalItems})
             </Button>
             
@@ -286,7 +374,7 @@ export function Header() {
                       Clear
                     </Button>
                     <a href="/checkout" className="w-full">
-                      <Button className="w-full text-xs py-1 text-center">
+                      <Button className="w-full text-xs py-1 text-center bg-rose-600 text-white hover:bg-rose-700">
                         Checkout
                       </Button>
                     </a>
@@ -323,7 +411,7 @@ git commit -m "feat: add global layout Header widget with cart state dropdown"
 - Create: `app/(storefront)/custom-builder/page.tsx`
 
 **Interfaces:**
-- Consumes: `useCustomBouquetStore` from `app/store/useCustomBouquetStore.ts`, `useCartStore` from `app/store/useCartStore.ts`.
+- Consumes: `useCustomBouquetStore` from `app/store/useCustomBouquetStore.ts`, `useCartStore` from `app/store/useCartStore.ts`, `Button` from `@/components/ui/button`.
 - Produces: Step-by-step interactive custom builder interface.
 
 - [ ] **Step 1: Implement `features/bouquet-builder/ui/BouquetBuilderWizard.tsx`**
@@ -331,7 +419,7 @@ git commit -m "feat: add global layout Header widget with cart state dropdown"
 ```tsx
 import { useCustomBouquetStore } from "@/app/store/useCustomBouquetStore";
 import { useCartStore } from "@/app/store/useCartStore";
-import { Button } from "@/shared/ui/Button";
+import { Button } from "@/components/ui/button";
 
 const availableStems = [
   { id: "s1", name: "Red Rose", pricePerStem: 20000, color: "Red" },
@@ -491,7 +579,7 @@ export function BouquetBuilderWizard() {
           {step < 3 ? (
             <Button onClick={nextStep} disabled={step === 1 && selectedStems.length === 0}>Next Step</Button>
           ) : (
-            <Button onClick={handleAddToCart}>Add Bouquet to Cart</Button>
+            <Button onClick={handleAddToCart} className="bg-rose-600 hover:bg-rose-700 text-white">Add Bouquet to Cart</Button>
           )}
         </div>
       </div>
@@ -539,7 +627,7 @@ git commit -m "feat: implement custom bouquet builder 3-step wizard and route pa
 - Create: `app/(storefront)/checkout/page.tsx`
 
 **Interfaces:**
-- Consumes: `useCartStore` from `app/store/useCartStore.ts`, `Button` and `Input` from `shared/ui/`.
+- Consumes: `useCartStore` from `app/store/useCartStore.ts`, `Button`, `Input` from `@/components/ui/`.
 - Produces: Gifting-specialized checkout form page.
 
 - [ ] **Step 1: Implement `features/checkout/ui/CheckoutForm.tsx`**
@@ -549,8 +637,8 @@ git commit -m "feat: implement custom bouquet builder 3-step wizard and route pa
 
 import * as React from "react";
 import { useCartStore } from "@/app/store/useCartStore";
-import { Button } from "@/shared/ui/Button";
-import { Input } from "@/shared/ui/Input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const preMadeCards = [
   { id: "bday", title: "Happy Birthday", message: "Wishing you a wonderful day filled with love, laughter, and beautiful moments. Happy Birthday!" },
@@ -656,7 +744,7 @@ export function CheckoutForm() {
                 <select
                   value={deliverySlot}
                   onChange={(e) => setDeliverySlot(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white text-slate-800 text-sm h-10"
                 >
                   <option>08:00 - 10:00</option>
                   <option>10:00 - 12:00</option>
@@ -687,7 +775,7 @@ export function CheckoutForm() {
                   key={card.id}
                   type="button"
                   variant="outline"
-                  className="text-xs py-1 px-3"
+                  className="text-xs py-1 px-3 border border-slate-300 text-slate-700 hover:bg-slate-50"
                   onClick={() => selectCardTemplate(card.message)}
                 >
                   {card.title}
@@ -698,7 +786,7 @@ export function CheckoutForm() {
               value={cardMessage}
               onChange={(e) => setCardMessage(e.target.value)}
               placeholder="Enter card message card here..."
-              className="w-full h-32 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white text-sm p-3"
+              className="w-full h-32 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white text-sm p-3 text-slate-800"
             />
           </div>
         </div>
@@ -717,7 +805,7 @@ export function CheckoutForm() {
             <span>Total:</span>
             <span>{totalPrice.toLocaleString()} VND</span>
           </div>
-          <Button type="submit" className="w-full py-3 text-center text-lg font-black tracking-wide">
+          <Button type="submit" className="w-full py-3 text-center text-lg font-black tracking-wide bg-rose-600 hover:bg-rose-700 text-white">
             Initiate Transaction & Pay
           </Button>
         </div>
@@ -842,7 +930,7 @@ git commit -m "feat: implement webhooks API handler with transaction updates and
 - Create: `app/api/admin/order/[id]/pdf/route.ts`
 
 **Interfaces:**
-- Consumes: `db` Prisma client, `pdfkit` (or simple text buffers).
+- Consumes: `db` Prisma client, `Button` from `@/components/ui/button`.
 - Produces: Secure admin dashboard order portal and printable cards generator.
 
 - [ ] **Step 1: Implement `/app/(admin)/admin/page.tsx`**
@@ -850,7 +938,7 @@ git commit -m "feat: implement webhooks API handler with transaction updates and
 ```tsx
 import * as React from "react";
 import { db } from "@/shared/lib/prisma";
-import { Button } from "@/shared/ui/Button";
+import { Button } from "@/components/ui/button";
 
 export default async function AdminDashboard() {
   const orders = await db.order.findMany({
@@ -891,11 +979,11 @@ export default async function AdminDashboard() {
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto">
                 <a href={`/api/admin/order/${order.id}/pdf`} target="_blank" className="w-full md:w-auto">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full border border-slate-300 text-slate-700 hover:bg-slate-50">
                     Print Greeting Card PDF
                   </Button>
                 </a>
-                <Button className="w-full md:w-auto">
+                <Button className="w-full md:w-auto bg-rose-600 text-white hover:bg-rose-700">
                   Mark Delivered
                 </Button>
               </div>
