@@ -1,7 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import { PrismaClient } from "@prisma/client";
+import {PrismaClient} from "@prisma/client/extension";
 
 const prisma = new PrismaClient();
 
@@ -17,7 +17,7 @@ export const authConfig = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials: any) {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }

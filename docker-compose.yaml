@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:15-alpine # Using a specific, lightweight version is best practice
+    container_name: local-postgres-compose
+    environment:
+      POSTGRES_USER: postgres        # Custom username (optional, defaults to postgres)
+      POSTGRES_PASSWORD: 12345  # Your secret password
+      POSTGRES_DB: flower-store       # Automatically creates a custom database
+    ports:
+      - "5432:5432"
+    volumes:
+      - flowerstore_dev_pgdata:/var/lib/postgresql/data # Persists your data automatically
+
+volumes:
+  flowerstore_dev_pgdata:
