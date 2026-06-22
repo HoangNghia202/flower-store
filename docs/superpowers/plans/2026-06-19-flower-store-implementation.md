@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   description: "Exquisite flower arrangements and custom bespoke designs delivered instantly.",
 };
 
-export default function RootLayout({
+export default function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;

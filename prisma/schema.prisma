@@ -5,7 +5,7 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  output   = "./generated"
 }
 
 datasource db {
@@ -19,16 +19,16 @@ enum UserRole {
 
 // 1. User management
 model User {
-  id            String                @id @default(cuid())
-  name          String?
-  email         String                @unique
-  password      String // Dùng cho Login truyền thống
-  role          UserRole              @default(CUSTOMER)
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
-  orders        Order[]
-  addressBook   AddressBookEntry[]
-  reminders     AnniversaryReminder[]
+  id          String                @id @default(cuid())
+  name        String?
+  email       String                @unique
+  password    String // Dùng cho Login truyền thống
+  role        UserRole              @default(CUSTOMER)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  orders      Order[]
+  addressBook AddressBookEntry[]
+  reminders   AnniversaryReminder[]
 }
 
 // 2. Danh mục sản phẩm (Sinh nhật, Khai trương, Hoa Hồng...)
@@ -86,46 +86,46 @@ model ProductStem {
 
 // 4. Đơn hàng (Đặc thù ngành hoa)
 model Order {
-  id              String          @id @default(cuid())
-  orderNumber     String          @unique // Mã đơn hàng hiển thị cho khách (VD: FLW-123456)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  status          OrderStatus     @default(PENDING)
-  totalAmount     Float
+  id          String      @id @default(cuid())
+  orderNumber String      @unique // Mã đơn hàng hiển thị cho khách (VD: FLW-123456)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  status      OrderStatus @default(PENDING)
+  totalAmount Float
 
   // Thông tin người MUA
-  buyerName       String
-  buyerPhone      String
-  buyerEmail      String
+  buyerName  String
+  buyerPhone String
+  buyerEmail String
 
   // Thông tin người NHẬN (Đặc thù tặng quà)
-  recipientName   String
-  recipientPhone  String
+  recipientName    String
+  recipientPhone   String
   recipientAddress String
-  isAnonymous     Boolean         @default(false) // Giao hàng ẩn danh
+  isAnonymous      Boolean @default(false) // Giao hàng ẩn danh
 
   // Lời chúc và Thời gian giao (Đặc thù ngành hoa)
-  cardMessage     String? // Lời chúc in trên thiệp
-  deliveryDate    DateTime // Ngày giao hoa khách chọn
-  deliverySlot    String // Khung giờ giao (VD: "08:00 - 10:00")
+  cardMessage  String? // Lời chúc in trên thiệp
+  deliveryDate DateTime // Ngày giao hoa khách chọn
+  deliverySlot String // Khung giờ giao (VD: "08:00 - 10:00")
 
   // Thanh toán
-  paymentMethod   String // COD, VNPAY, MOMO, PAYOS
-  paymentStatus   PaymentStatus   @default(UNPAID)
+  paymentMethod    String // COD, VNPAY, MOMO, PAYOS
+  paymentStatus    PaymentStatus @default(UNPAID)
   paymentSessionId String? // ID session thanh toán để webhook tracking
 
   // Quan hệ
-  userId          String? // Có thể null nếu khách mua không cần tài khoản (Guest Checkout)
-  user            User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
-  items           OrderItem[]
-  customBouquets  CustomBouquet[]
+  userId         String? // Có thể null nếu khách mua không cần tài khoản (Guest Checkout)
+  user           User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items          OrderItem[]
+  customBouquets CustomBouquet[]
 }
 
 // 5. Chi tiết sản phẩm trong đơn hàng
 model OrderItem {
-  id        String  @id @default(cuid())
-  quantity  Int
-  price     Float // Lưu giá tại thời điểm mua
+  id       String @id @default(cuid())
+  quantity Int
+  price    Float // Lưu giá tại thời điểm mua
 
   orderId   String
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -208,4 +208,3 @@ enum PaymentStatus {
   PAID
   REFUNDED
 }
-

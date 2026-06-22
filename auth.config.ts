@@ -1,9 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import {PrismaClient} from "@prisma/client/extension";
-
-const prisma = new PrismaClient();
+import {prisma} from "@/prisma/prisma-instance";
 
 export const authConfig = {
   providers: [
@@ -54,8 +52,8 @@ export const authConfig = {
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role || "CUSTOMER";
+        session.user.id = <string>token.id;
+        session.user.role = <string> token.role || "CUSTOMER";
       }
       return session;
     },
