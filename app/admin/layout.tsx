@@ -1,9 +1,7 @@
-export default function AdminLayout({children,}: Readonly<{
+export default function AdminLayout({
+    children,
+}: Readonly<{
     children: React.ReactNode;
 }>) {
-    return (
-        <div>
-            {children}
-        </div>
-    );
+    return <div>{children}</div>;
 }
