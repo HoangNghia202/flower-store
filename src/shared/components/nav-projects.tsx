@@ -1,6 +1,7 @@
 "use client";
 
 import {
+    Collapsible,
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -33,8 +34,8 @@ export function NavProjects({
     const { isMobile } = useSidebar();
 
     return (
-        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-            <SidebarGroupLabel>Projects</SidebarGroupLabel>
+        <SidebarGroup className="">
+            {/*<SidebarGroupLabel>Projects</SidebarGroupLabel>*/}
             <SidebarMenu>
                 {projects.map((item) => (
                     <SidebarMenuItem key={item.name}>
@@ -76,12 +77,12 @@ export function NavProjects({
                         </DropdownMenu>
                     </SidebarMenuItem>
                 ))}
-                <SidebarMenuItem>
-                    <SidebarMenuButton className="text-sidebar-foreground/70">
-                        <MoreHorizontalIcon className="text-sidebar-foreground/70" />
-                        <span>More</span>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
+                {/*<SidebarMenuItem>*/}
+                {/*    <SidebarMenuButton className="text-sidebar-foreground/70">*/}
+                {/*        <MoreHorizontalIcon className="text-sidebar-foreground/70" />*/}
+                {/*        <span>More</span>*/}
+                {/*    </SidebarMenuButton>*/}
+                {/*</SidebarMenuItem>*/}
             </SidebarMenu>
         </SidebarGroup>
     );

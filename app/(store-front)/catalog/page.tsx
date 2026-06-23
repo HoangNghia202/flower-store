@@ -1,3 +1,1 @@
-export default function CatalogPage() {
-    return <div>catalog page</div>;
-}
+export { CatalogPage as default } from "@/_pages/store-front/catalog";

@@ -1,4 +1,1 @@
-import { handlers } from "@/auth";
-
-export const { GET, POST } = handlers;
-export const runtime = "nodejs";
+export * from "@/_app/api-routes/auth.route";

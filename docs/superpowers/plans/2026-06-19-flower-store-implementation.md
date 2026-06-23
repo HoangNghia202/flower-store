@@ -134,7 +134,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
-export default function LoginPage() {
+export default function RegisterPage() {
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [error, setError] = React.useState<string | null>(null);

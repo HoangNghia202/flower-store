@@ -1,3 +1,1 @@
-export default function LoginPage() {
-    return <div>Login page</div>;
-}
+export { LoginPage as default } from "@/_pages/auth/login";

@@ -1,3 +1,1 @@
-export default function CustomBouquetPage() {
-    return <div>custom bouquet page</div>;
-}
+export { CustomBouquetPage as default } from "@/_pages/store-front/custom-bouquet";

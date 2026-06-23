@@ -1,3 +1,1 @@
-export default function RegisterPage() {
-    return <div>Register page</div>;
-}
+export { SignupPage as default } from "@/_pages/auth/register";
