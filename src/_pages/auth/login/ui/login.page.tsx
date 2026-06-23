@@ -1,5 +1,4 @@
-import { LoginForm } from "@/shared/components/login-form";
-
+import { LoginForm } from "./login-form";
 export function LoginPage() {
     return (
         <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
