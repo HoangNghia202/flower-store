@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/shared/lib/utils/index";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
@@ -9,18 +11,40 @@ import {
     FieldSeparator,
 } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
+import { AuthActionState } from "@/src/entites/user/actions";
 import Link from "next/link";
+import Image from "next/image";
+import { useActionState } from "react";
+
+type Props = React.ComponentProps<"div"> & {
+    loginAction: (
+        state: AuthActionState | null,
+        data: FormData,
+    ) => Promise<AuthActionState>;
+    onSignInWithGoogle: () => void;
+    redirectTo?: string;
+};
 
 export function LoginForm({
     className,
+    loginAction,
+    onSignInWithGoogle,
+    redirectTo,
     ...props
-}: React.ComponentProps<"div">) {
+}: Props) {
+    const [state, formAction, isPending] = useActionState(loginAction, {});
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card className="overflow-hidden p-0">
                 <CardContent className="grid p-0 md:grid-cols-2">
-                    <form className="p-6 md:p-8">
+                    <form className="p-6 md:p-8" action={formAction}>
                         <FieldGroup>
+                            <input
+                                type="hidden"
+                                name="redirectTo"
+                                value={redirectTo ?? "/"}
+                            />
                             <div className="flex flex-col items-center gap-2 text-center">
                                 <h1 className="text-2xl font-bold">
                                     Welcome back
@@ -29,10 +53,16 @@ export function LoginForm({
                                     Login to your Acme Inc account
                                 </p>
                             </div>
+                            {state?.error && (
+                                <div className="rounded-md bg-destructive/10 p-3 text-sm font-medium text-destructive">
+                                    {state.error}
+                                </div>
+                            )}
                             <Field>
                                 <FieldLabel htmlFor="email">Email</FieldLabel>
                                 <Input
                                     id="email"
+                                    name="email"
                                     type="email"
                                     placeholder="m@example.com"
                                     required
@@ -50,16 +80,27 @@ export function LoginForm({
                                         Forgot your password?
                                     </a>
                                 </div>
-                                <Input id="password" type="password" required />
+                                <Input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    required
+                                />
                             </Field>
                             <Field>
-                                <Button type="submit">Login</Button>
+                                <Button type="submit" disabled={isPending}>
+                                    {isPending ? "Logging in..." : "Login"}
+                                </Button>
                             </Field>
                             <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                                 Or continue with
                             </FieldSeparator>
                             <Field>
-                                <Button variant="outline" type="button">
+                                <Button
+                                    variant="outline"
+                                    type="button"
+                                    onClick={onSignInWithGoogle}
+                                >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 24 24"
@@ -81,9 +122,10 @@ export function LoginForm({
                         </FieldGroup>
                     </form>
                     <div className="relative hidden bg-muted md:block">
-                        <img
-                            src="/placeholder.svg"
+                        <Image
+                            src="/globe.svg"
                             alt="Image"
+                            fill
                             className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
                         />
                     </div>

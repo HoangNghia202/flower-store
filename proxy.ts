@@ -12,6 +12,18 @@ export async function proxy(request: Request) {
         }
     }
 
+    if (
+        url.pathname.startsWith("/login") ||
+        url.pathname.startsWith("/register")
+    ) {
+        if (session) {
+            if (session.user.role == "ADMIN") {
+                return NextResponse.redirect(new URL("/admin", request.url));
+            }
+            return NextResponse.redirect(new URL("/catalog", request.url));
+        }
+    }
+
     return NextResponse.next();
 }
 

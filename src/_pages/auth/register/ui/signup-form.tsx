@@ -12,27 +12,40 @@ import {
 } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
 import Link from "next/link";
-import { JSX, useActionState } from "react"; // 2. Import useActionState
+import Image from "next/image";
+import { JSX, useActionState } from "react";
+import { AuthActionState } from "@/src/entites/user/actions"; // 2. Import useActionState
 
 type Props = React.ComponentProps<"div"> & {
-    signUpAction: (prevState: any, data: FormData) => Promise<any>;
+    signUpAction: (
+        state: AuthActionState | null,
+        data: FormData,
+    ) => Promise<AuthActionState>;
     onSignInWithGoogle: () => void;
+    redirectTo?: string;
 };
 
-export function SignupForm({ className, ...props }: Props): JSX.Element {
-    // 3. Connect action and capture action state containing errors or success messages
-    const [state, formAction, isPending] = useActionState(
-        props.signUpAction,
-        null,
-    );
+export function SignupForm({
+    className,
+    signUpAction,
+    onSignInWithGoogle,
+    redirectTo,
+    ...divProps
+}: Props): JSX.Element {
+    const [state, formAction, isPending] = useActionState(signUpAction, {});
 
     return (
-        <div className={cn("flex flex-col gap-6", className)} {...props}>
+        <div className={cn("flex flex-col gap-6", className)} {...divProps}>
             <Card className="overflow-hidden p-0">
                 <CardContent className="grid p-0 md:grid-cols-2">
                     {/* 4. Use formAction instead of props.signUpAction */}
                     <form className="p-6 md:p-8" action={formAction}>
                         <FieldGroup>
+                            <input
+                                type="hidden"
+                                name="redirectTo"
+                                value={redirectTo ?? "/"}
+                            />
                             <div className="flex flex-col items-center gap-2 text-center">
                                 <h1 className="text-2xl font-bold">
                                     Create your account
@@ -107,7 +120,7 @@ export function SignupForm({ className, ...props }: Props): JSX.Element {
                                 <Button
                                     variant="outline"
                                     type="button"
-                                    onClick={props.onSignInWithGoogle}
+                                    onClick={onSignInWithGoogle}
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -130,9 +143,10 @@ export function SignupForm({ className, ...props }: Props): JSX.Element {
                         </FieldGroup>
                     </form>
                     <div className="relative hidden bg-muted md:block">
-                        <img
-                            src="/placeholder.svg"
+                        <Image
+                            src="/globe.svg"
                             alt="Image"
+                            fill
                             className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
                         />
                     </div>
