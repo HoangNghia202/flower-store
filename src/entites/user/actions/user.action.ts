@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn } from "@/auth";
+import { signIn, signOut } from "@/auth";
 import bcrypt from "bcrypt";
 import { AuthError } from "next-auth";
 import { Prisma } from "@/prisma/generated/client";
@@ -113,4 +113,10 @@ export async function loginAction(
 // Action xử lý Đăng nhập bằng Google
 export async function signInWithGoogle(redirectUrl?: string) {
     await signIn("google", { redirectTo: redirectUrl });
+}
+
+export async function logoutAction(redirectTo?: string) {
+    await signOut({
+        redirectTo,
+    });
 }

@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { NavProjects } from "@/shared/components/nav-projects";
-import { NavUser } from "@/shared/components/nav-user";
 import { TeamSwitcher } from "@/shared/components/team-switcher";
 import {
     Sidebar,
@@ -23,7 +22,6 @@ import {
     TerminalIcon,
     TerminalSquareIcon,
 } from "lucide-react";
-import { ModeToggle } from "@/shared/components/theme-swicher";
 
 // This is sample data.
 const data = {
@@ -165,10 +163,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {/*<NavMain items={data.navMain} />*/}
                 <NavProjects projects={data.projects} />
             </SidebarContent>
-            <SidebarFooter>
-                <ModeToggle />
-                <NavUser user={data.user} />
-            </SidebarFooter>
+            <SidebarFooter>{props.children}</SidebarFooter>
             <SidebarRail />
         </Sidebar>
     );
