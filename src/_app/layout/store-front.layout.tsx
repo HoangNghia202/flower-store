@@ -22,7 +22,9 @@ export async function StoreFrontLayout({
             <AppSidebar>
                 <UserDropDownMenu
                     user={user}
-                    logoutActionSlot={<LogOutButton />}
+                    logoutActionSlot={
+                        <LogOutButton variant={"ghost"} size={"xs"} />
+                    }
                 ></UserDropDownMenu>
             </AppSidebar>
             <SidebarInset>
