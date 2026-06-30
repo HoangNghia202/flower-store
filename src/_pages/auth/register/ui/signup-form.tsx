@@ -1,4 +1,4 @@
-"use client"; // 1. Support React Hooks client-side
+"use client";
 
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/shared/ui/card";
 import {
     Field,
     FieldDescription,
+    FieldError,
     FieldGroup,
     FieldLabel,
     FieldSeparator,
@@ -13,8 +14,14 @@ import {
 import { Input } from "@/shared/ui/input";
 import Link from "next/link";
 import Image from "next/image";
-import { JSX, useActionState } from "react";
-import { AuthActionState } from "@/src/entites/user/actions"; // 2. Import useActionState
+import { JSX, useActionState, useState } from "react";
+import { AuthActionState } from "@/src/entites/user/actions";
+import {
+    getAuthFieldErrors,
+    signupPasswordRequirements,
+    signupFormSchema,
+    type AuthFieldErrors,
+} from "@/src/entites/user/model";
 
 type Props = React.ComponentProps<"div"> & {
     signUpAction: (
@@ -33,13 +40,66 @@ export function SignupForm({
     ...divProps
 }: Props): JSX.Element {
     const [state, formAction, isPending] = useActionState(signUpAction, {});
+    const [clientFieldErrors, setClientFieldErrors] =
+        useState<AuthFieldErrors>({});
+    const [clientFormError, setClientFormError] = useState<string>();
+
+    const emailErrors = clientFieldErrors.email ?? state.fieldErrors?.email;
+    const passwordErrors =
+        clientFieldErrors.password ?? state.fieldErrors?.password;
+    const confirmPasswordErrors =
+        clientFieldErrors["confirm-password"] ??
+        state.fieldErrors?.["confirm-password"];
+    const formError = clientFormError ?? state.error;
+
+    function clearFieldError(fieldName: keyof AuthFieldErrors) {
+        setClientFieldErrors((currentErrors) => {
+            if (!currentErrors[fieldName]) {
+                return currentErrors;
+            }
+
+            const nextErrors = { ...currentErrors };
+            delete nextErrors[fieldName];
+
+            return nextErrors;
+        });
+        setClientFormError(undefined);
+    }
+
+    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        const formData = new FormData(event.currentTarget);
+        const validationResult = signupFormSchema.safeParse({
+            email: formData.get("email"),
+            password: formData.get("password"),
+            "confirm-password": formData.get("confirm-password"),
+        });
+
+        if (!validationResult.success) {
+            event.preventDefault();
+            setClientFieldErrors(getAuthFieldErrors(validationResult.error));
+            setClientFormError("Please correct the highlighted fields.");
+
+            return;
+        }
+
+        setClientFieldErrors({});
+        setClientFormError(undefined);
+    }
+
+    function toErrorItems(messages?: string[]) {
+        return messages?.map((message) => ({ message }));
+    }
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...divProps}>
             <Card className="overflow-hidden p-0">
                 <CardContent className="grid p-0 md:grid-cols-2">
-                    {/* 4. Use formAction instead of props.signUpAction */}
-                    <form className="p-6 md:p-8" action={formAction}>
+                    <form
+                        className="p-6 md:p-8"
+                        action={formAction}
+                        onSubmit={handleSubmit}
+                        noValidate
+                    >
                         <FieldGroup>
                             <input
                                 type="hidden"
@@ -56,22 +116,26 @@ export function SignupForm({
                                 </p>
                             </div>
 
-                            {/* Show error alerts return from Server Action */}
-                            {state?.error && (
-                                <div className="text-sm font-medium text-destructive bg-destructive/10 p-3 rounded-md">
-                                    {state.error}
+                            {formError && (
+                                <div className="rounded-md bg-destructive/10 p-3 text-sm font-medium text-destructive">
+                                    {formError}
                                 </div>
                             )}
 
-                            <Field>
+                            <Field
+                                data-invalid={Boolean(emailErrors?.length) || undefined}
+                            >
                                 <FieldLabel htmlFor="email">Email</FieldLabel>
                                 <Input
                                     id="email"
-                                    name="email" // 5. Crucial: Added name attribute
+                                    name="email"
                                     type="email"
                                     placeholder="m@example.com"
+                                    aria-invalid={Boolean(emailErrors?.length)}
+                                    onChange={() => clearFieldError("email")}
                                     required
                                 />
+                                <FieldError errors={toErrorItems(emailErrors)} />
                                 <FieldDescription>
                                     We&apos;ll use this to contact you. We will
                                     not share your email with anyone else.
@@ -79,31 +143,53 @@ export function SignupForm({
                             </Field>
                             <Field>
                                 <Field className="grid grid-cols-2 gap-4">
-                                    <Field>
+                                    <Field
+                                        data-invalid={Boolean(passwordErrors?.length) || undefined}
+                                    >
                                         <FieldLabel htmlFor="password">
                                             Password
                                         </FieldLabel>
                                         <Input
                                             id="password"
-                                            name="password" // 6. Crucial: Added name attribute
+                                            name="password"
                                             type="password"
+                                            aria-invalid={Boolean(passwordErrors?.length)}
+                                            onChange={() => clearFieldError("password")}
                                             required
                                         />
+                                        <FieldError
+                                            errors={toErrorItems(passwordErrors)}
+                                        />
                                     </Field>
-                                    <Field>
+                                    <Field
+                                        data-invalid={Boolean(confirmPasswordErrors?.length) || undefined}
+                                    >
                                         <FieldLabel htmlFor="confirm-password">
                                             Confirm Password
                                         </FieldLabel>
                                         <Input
                                             id="confirm-password"
-                                            name="confirm-password" // 7. Crucial: Added name attribute
+                                            name="confirm-password"
                                             type="password"
+                                            aria-invalid={Boolean(
+                                                confirmPasswordErrors?.length,
+                                            )}
+                                            onChange={() =>
+                                                clearFieldError(
+                                                    "confirm-password",
+                                                )
+                                            }
                                             required
+                                        />
+                                        <FieldError
+                                            errors={toErrorItems(
+                                                confirmPasswordErrors,
+                                            )}
                                         />
                                     </Field>
                                 </Field>
                                 <FieldDescription>
-                                    Must be at least 8 characters long.
+                                    {signupPasswordRequirements}
                                 </FieldDescription>
                             </Field>
                             <Field>

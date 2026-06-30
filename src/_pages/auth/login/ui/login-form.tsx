@@ -1,20 +1,26 @@
 "use client";
 
-import { cn } from "@/shared/lib/utils/index";
+import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import {
     Field,
     FieldDescription,
+    FieldError,
     FieldGroup,
     FieldLabel,
     FieldSeparator,
 } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
 import { AuthActionState } from "@/src/entites/user/actions";
+import {
+    getAuthFieldErrors,
+    loginFormSchema,
+    type AuthFieldErrors,
+} from "@/src/entites/user/model";
 import Link from "next/link";
 import Image from "next/image";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 type Props = React.ComponentProps<"div"> & {
     loginAction: (
@@ -33,12 +39,62 @@ export function LoginForm({
     ...props
 }: Props) {
     const [state, formAction, isPending] = useActionState(loginAction, {});
+    const [clientFieldErrors, setClientFieldErrors] =
+        useState<AuthFieldErrors>({});
+    const [clientFormError, setClientFormError] = useState<string>();
+
+    const emailErrors = clientFieldErrors.email ?? state.fieldErrors?.email;
+    const passwordErrors =
+        clientFieldErrors.password ?? state.fieldErrors?.password;
+    const formError = clientFormError ?? state.error;
+
+    function clearFieldError(fieldName: keyof AuthFieldErrors) {
+        setClientFieldErrors((currentErrors) => {
+            if (!currentErrors[fieldName]) {
+                return currentErrors;
+            }
+
+            const nextErrors = { ...currentErrors };
+            delete nextErrors[fieldName];
+
+            return nextErrors;
+        });
+        setClientFormError(undefined);
+    }
+
+    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        const formData = new FormData(event.currentTarget);
+        const validationResult = loginFormSchema.safeParse({
+            email: formData.get("email"),
+            password: formData.get("password"),
+        });
+
+        if (!validationResult.success) {
+            event.preventDefault();
+            setClientFieldErrors(getAuthFieldErrors(validationResult.error));
+            setClientFormError("Please correct the highlighted fields.");
+
+            return;
+        }
+
+        setClientFieldErrors({});
+        setClientFormError(undefined);
+    }
+
+    function toErrorItems(messages?: string[]) {
+        return messages?.map((message) => ({ message }));
+    }
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card className="overflow-hidden p-0">
                 <CardContent className="grid p-0 md:grid-cols-2">
-                    <form className="p-6 md:p-8" action={formAction}>
+                    <form
+                        className="p-6 md:p-8"
+                        action={formAction}
+                        onSubmit={handleSubmit}
+                        noValidate
+                    >
                         <FieldGroup>
                             <input
                                 type="hidden"
@@ -53,22 +109,29 @@ export function LoginForm({
                                     Login to your Acme Inc account
                                 </p>
                             </div>
-                            {state?.error && (
+                            {formError && (
                                 <div className="rounded-md bg-destructive/10 p-3 text-sm font-medium text-destructive">
-                                    {state.error}
+                                    {formError}
                                 </div>
                             )}
-                            <Field>
+                            <Field
+                                data-invalid={Boolean(emailErrors?.length) || undefined}
+                            >
                                 <FieldLabel htmlFor="email">Email</FieldLabel>
                                 <Input
                                     id="email"
                                     name="email"
                                     type="email"
                                     placeholder="m@example.com"
+                                    aria-invalid={Boolean(emailErrors?.length)}
+                                    onChange={() => clearFieldError("email")}
                                     required
                                 />
+                                <FieldError errors={toErrorItems(emailErrors)} />
                             </Field>
-                            <Field>
+                            <Field
+                                data-invalid={Boolean(passwordErrors?.length) || undefined}
+                            >
                                 <div className="flex items-center">
                                     <FieldLabel htmlFor="password">
                                         Password
@@ -84,7 +147,12 @@ export function LoginForm({
                                     id="password"
                                     name="password"
                                     type="password"
+                                    aria-invalid={Boolean(passwordErrors?.length)}
+                                    onChange={() => clearFieldError("password")}
                                     required
+                                />
+                                <FieldError
+                                    errors={toErrorItems(passwordErrors)}
                                 />
                             </Field>
                             <Field>

@@ -3,11 +3,18 @@
 import { signIn, signOut } from "@/auth";
 import bcrypt from "bcrypt";
 import { AuthError } from "next-auth";
-import { Prisma } from "@/prisma/generated/client";
+import { Prisma, UserRole } from "@/prisma/generated/client";
 import { prisma } from "@/prisma/prisma-instance";
+import {
+    getAuthFieldErrors,
+    loginFormSchema,
+    signupFormSchema,
+    type AuthFieldErrors,
+} from "@/src/entites/user/model";
 
 export type AuthActionState = {
     error?: string;
+    fieldErrors?: AuthFieldErrors;
     success?: boolean;
 };
 
@@ -16,18 +23,21 @@ export async function signUpAction(
     _prevState: AuthActionState | null,
     formData: FormData,
 ): Promise<AuthActionState> {
-    const email = String(formData.get("email") ?? "").trim();
-    const password = String(formData.get("password") ?? "");
-    const confirmPassword = String(formData.get("confirm-password") ?? "");
+    const validationResult = signupFormSchema.safeParse({
+        email: formData.get("email"),
+        password: formData.get("password"),
+        "confirm-password": formData.get("confirm-password"),
+    });
     const redirectTo = String(formData.get("redirectTo") ?? "/");
 
-    if (!email || !password) {
-        return { error: "Vui lòng điền đầy đủ email và mật khẩu." };
+    if (!validationResult.success) {
+        return {
+            error: "Please correct the highlighted fields.",
+            fieldErrors: getAuthFieldErrors(validationResult.error),
+        };
     }
 
-    if (password !== confirmPassword) {
-        return { error: "Mật khẩu xác nhận không khớp." };
-    }
+    const { email, password } = validationResult.data;
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -37,7 +47,7 @@ export async function signUpAction(
                 email,
                 name: "",
                 password: hashedPassword,
-                role: "CUSTOMER",
+                role: UserRole.ADMIN,
             },
         });
 
@@ -50,11 +60,16 @@ export async function signUpAction(
             error instanceof Prisma.PrismaClientKnownRequestError &&
             error.code === "P2002"
         ) {
-            return { error: "Email này đã được đăng ký." };
+            return {
+                error: "This email is already registered.",
+                fieldErrors: {
+                    email: ["This email is already registered."],
+                },
+            };
         }
 
         console.error("Không thể tạo tài khoản:", error);
-        return { error: "Có lỗi xảy ra trong quá trình đăng ký." };
+        return { error: "Unable to create your account right now." };
     }
 
     try {
@@ -68,7 +83,9 @@ export async function signUpAction(
     } catch (error) {
         if (error instanceof AuthError) {
             if (error.type === "CredentialsSignin") {
-                return { error: "Đăng nhập tự động thất bại." };
+                return {
+                    error: "Automatic sign-in failed after registration.",
+                };
             }
         }
 
@@ -77,16 +94,24 @@ export async function signUpAction(
 }
 
 export async function loginAction(
-    prevState: AuthActionState | null,
+    _prevState: AuthActionState | null,
     formData: FormData,
 ): Promise<AuthActionState> {
-    const email = String(formData.get("email") ?? "").trim();
-    const password = String(formData.get("password") ?? "");
+    debugger;
+    const validationResult = loginFormSchema.safeParse({
+        email: formData.get("email"),
+        password: formData.get("password"),
+    });
     const redirectTo = String(formData.get("redirectTo") ?? "/");
 
-    if (!email || !password) {
-        return { error: "Please enter both email and password." };
+    if (!validationResult.success) {
+        return {
+            error: "Please correct the highlighted fields.",
+            fieldErrors: getAuthFieldErrors(validationResult.error),
+        };
     }
+
+    const { email, password } = validationResult.data;
 
     try {
         await signIn("credentials", {
