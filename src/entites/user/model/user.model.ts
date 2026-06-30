@@ -8,3 +8,12 @@ export class UserVM {
         Object.assign(this, init);
     }
 }
+
+// Plain object type for serialization across server-client boundary
+export type User = {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string;
+};
+

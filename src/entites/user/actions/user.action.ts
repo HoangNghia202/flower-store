@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn, signOut } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 import bcrypt from "bcrypt";
 import { AuthError } from "next-auth";
 import { Prisma, UserRole } from "@/prisma/generated/client";
@@ -10,6 +10,7 @@ import {
     loginFormSchema,
     signupFormSchema,
     type AuthFieldErrors,
+    type UserVM,
 } from "@/src/entites/user/model";
 
 export type AuthActionState = {
@@ -144,4 +145,28 @@ export async function logoutAction(redirectTo?: string) {
     await signOut({
         redirectTo,
     });
+}
+
+export async function getMeAction() {
+    const session = await auth();
+
+    if (!session?.user?.email) {
+        return null;
+    }
+
+    // Fetch full user data from database
+    const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+    });
+
+    if (!user) {
+        return null;
+    }
+
+    return {
+        id: user.id,
+        name: user.name || "User",
+        email: user.email,
+        avatar: "/avatars/default.jpg",
+    } satisfies UserVM;
 }
