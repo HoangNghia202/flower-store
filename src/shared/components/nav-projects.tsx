@@ -1,14 +1,12 @@
 "use client";
 
 import {
-    Collapsible,
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
     SidebarGroup,
-    SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuAction,
     SidebarMenuButton,
@@ -21,6 +19,7 @@ import {
     MoreHorizontalIcon,
     Trash2Icon,
 } from "lucide-react";
+import Link from "next/link";
 
 export function NavProjects({
     projects,
@@ -40,10 +39,10 @@ export function NavProjects({
                 {projects.map((item) => (
                     <SidebarMenuItem key={item.name}>
                         <SidebarMenuButton asChild>
-                            <a href={item.url}>
+                            <Link className={""} href={item.url}>
                                 {item.icon}
                                 <span>{item.name}</span>
-                            </a>
+                            </Link>
                         </SidebarMenuButton>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>

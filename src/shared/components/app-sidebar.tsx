@@ -14,14 +14,14 @@ import {
     AudioLinesIcon,
     BookOpenIcon,
     BotIcon,
-    FrameIcon,
     GalleryVerticalEndIcon,
-    MapIcon,
-    PieChartIcon,
+    ListPlusIcon,
     Settings2Icon,
     TerminalIcon,
     TerminalSquareIcon,
+    VectorSquareIcon,
 } from "lucide-react";
+import { APP_PAGE } from "@/shared/lib/constants/app-page.const";
 
 // This is sample data.
 const data = {
@@ -136,19 +136,14 @@ const data = {
     ],
     projects: [
         {
-            name: "Design Engineering",
-            url: "#",
-            icon: <FrameIcon />,
+            name: "Catalog",
+            url: APP_PAGE.Catalog,
+            icon: <ListPlusIcon />,
         },
         {
-            name: "Sales & Marketing",
-            url: "#",
-            icon: <PieChartIcon />,
-        },
-        {
-            name: "Travel",
-            url: "#",
-            icon: <MapIcon />,
+            name: "Custom Bouquet",
+            url: APP_PAGE.CustomBouquet,
+            icon: <VectorSquareIcon />,
         },
     ],
 };
