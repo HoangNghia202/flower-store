@@ -1,0 +1,9 @@
+docs: add updated architecture spec reflecting current FSD structure
+
+- Documents actual src/_app/, src/_pages/, src/entites/ folder layout
+- Updates all three Zustand stores (cart, bouquet builder, user)
+- Documents Initializer pattern, proxy.ts auth routing
+- Adds routing table, known technical debt section
+- Supersedes 2026-06-19-flower-store-design.md
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
