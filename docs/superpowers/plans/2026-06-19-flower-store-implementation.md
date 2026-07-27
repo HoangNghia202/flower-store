@@ -418,6 +418,23 @@ git commit -m "feat: configure root layout wrapper, user registration server act
 
 ---
 
+### ✅ Task 1.5: Landing Page & Brand Color System — COMPLETED 2026-07-27
+
+**Spec**: `docs/superpowers/specs/2026-07-27-landing-page-design.md`
+
+**Files modified/created:**
+- ✅ `app/globals.css` — added brand color tokens (`brand-navy`, `brand-cream`, `brand-sage`, `brand-earth`)
+- ✅ `src/widgets/navbar/ui/navbar.tsx` — sticky top navbar with cart badge, auth dropdown
+- ✅ `src/widgets/navbar/index.ts` — exports Navbar
+- ✅ `src/widgets/index.ts` — exports navbar widget
+- ✅ `src/_pages/home/ui/home.page.tsx` — composes Navbar + all sections via Initializer
+- ✅ `src/_pages/home/ui/sections/hero.section.tsx` — split layout hero
+- ✅ `src/_pages/home/ui/sections/categories.section.tsx` — occasion pill links
+- ✅ `src/_pages/home/ui/sections/featured-products.section.tsx` — 3-col product grid (mock data)
+- ✅ `src/_pages/home/ui/sections/why-choose-us.section.tsx` — 3-card navy section
+
+---
+
 ### Task 2: Product Card & Catalog Filter (Entities & Features)
 
 **Files:**
