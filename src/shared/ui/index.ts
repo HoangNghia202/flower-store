@@ -2,6 +2,7 @@ export * from "./avatar";
 export * from "./breadcrumb";
 export * from "./button";
 export * from "./dropdown-menu";
+export * from "./gradient-orb";
 export * from "./input";
 export * from "./separator";
 export * from "./sheet";
