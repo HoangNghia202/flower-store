@@ -53,9 +53,9 @@ export async function StoreFrontLayout({
                             {/*    </BreadcrumbList>*/}
                             {/*</Breadcrumb>*/}
                         </div>
-                        <div className="ml-auto px-5">
+                        {/* <div className="ml-auto px-5">
                             <ThemeSwitcher></ThemeSwitcher>
-                        </div>
+                        </div> */}
                     </header>
                     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
                         <div className="grid auto-rows-min gap-4 md:grid-cols-3">
