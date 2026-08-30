@@ -19,7 +19,8 @@ This pass delivers the storefront product catalog:
 
 - Cart drawer / cart page / cart badge in the sidebar. Add-to-cart gives inline "Added ✓" feedback only.
 - Checkout.
-- Admin product CRUD (and therefore `revalidateTag` wiring — see §7).
+- Admin product CRUD.
+- `"use cache"` / `cacheTag` / `revalidateTag` — requires enabling `cacheComponents` app-wide (see §7).
 - Rewiring `featured-products.widget.tsx` to real data (still hardcoded; acceptable).
 - `AppSidebar` nav cleanup and the hardcoded `user` in `StoreFrontLayout` (auth concern).
 - Wishlist / favorites (the heart icon on cards is decorative).
@@ -304,13 +305,14 @@ export async function loadMoreProducts(query: CatalogParams, cursor: string): Pr
 
 ---
 
-## 7. Caching (Next.js 16)
+## 7. Caching (Next.js 16) — deferred
 
-- `getProducts` and `getCatalogFacets` use `"use cache"` with `cacheTag("products")` (+ `cacheTag("categories")` for facets) and `cacheLife("minutes")`. `getProducts` is cache-keyed by its full argument object including `cursor`, so each scroll page caches independently; it is called both from the server component (first page) and from inside the `loadMoreProducts` server action (subsequent pages) — verify `"use cache"` is permitted in a function invoked from a `"use server"` action against the Next docs; if not, drop `"use cache"` from `getProducts` and keep the reads dynamic.
-- `getProductBySlug` uses `"use cache"`, `cacheTag("products")`, `cacheTag(\`product:\${slug}\`)`, `cacheLife("hours")`.
-- No `revalidateTag` caller exists yet (admin CRUD is out of scope). Document the tags so the admin pass can call `revalidateTag("products", "max")`.
-- `app/(store-front)/catalog/page.tsx` stays dynamic (reads `searchParams`); caching happens at the data-function layer, not the route.
-- Before writing any of this, **read `node_modules/next/dist/docs/`** for the current `use cache` / `cacheLife` / `cacheTag` signatures (per `AGENTS.md`) — the exact `cacheLife` profile arg and import path must be verified, not assumed.
+**Decision after reading `node_modules/next/dist/docs/01-app/03-api-reference/01-directives/use-cache.md`:** `"use cache"` / `cacheLife` / `cacheTag` require `cacheComponents: true` in `next.config.ts`. That is an app-wide opt-in (every dynamic read then needs a `use cache` scope or a `<Suspense>` boundary) with ripple effects well beyond the catalog. **Out of scope for this pass.**
+
+- All catalog reads (`getProducts`, `getCatalogFacets`, `getProductBySlug`) are **plain dynamic** `async` functions — no caching directives.
+- `app/(store-front)/catalog/page.tsx` is naturally dynamic (awaits `searchParams`); `/catalog/[slug]` is dynamic per request.
+- Performance for v1 rests on: narrow Prisma `select`, indexed `slug`/`categoryId`, cursor pagination (no large `OFFSET`), `next/image`, and `content-visibility` on cards.
+- **Follow-up (§13):** enable `cacheComponents`, wrap the reads in `use cache` with `cacheTag("products")` / `cacheTag(\`product:\${slug}\`)`, and call `revalidateTag("products", "max")` from the future admin product-CRUD pass. Add `@@index([categoryId])` / `@@index([createdAt])` to `Product` at that time if `EXPLAIN` shows it's needed.
 
 ---
 
@@ -451,7 +453,7 @@ If a lightweight unit test is warranted, target the pure functions in `catalog-p
 ## 13. Known follow-ups (explicitly deferred)
 
 1. Cart drawer + sidebar cart badge + cart page.
-2. `revalidateTag("products")` from an admin product-CRUD pass.
+2. Enable `cacheComponents` in `next.config.ts`, wrap catalog reads in `"use cache"` + `cacheTag`, and call `revalidateTag("products", "max")` from an admin product-CRUD pass (§7).
 3. Rewire `featured-products.widget.tsx` (and the category counts in `categories.widget.tsx`) to real DB data.
 4. `AppSidebar` real nav + `StoreFrontLayout` reading the authed user from `useUserStore` instead of the hardcoded object.
 5. Multi-select category/color, "in stock only" toggle, cross-widget pending dim (Zustand `catalogPending`).
