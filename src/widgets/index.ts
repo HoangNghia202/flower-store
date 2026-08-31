@@ -9,3 +9,4 @@ export * from "./newsletter.widget";
 export * from "./footer.widget";
 export * from "./catalog-filter.widget";
 export * from "./catalog-products.widget";
+export * from "./catalog-product-detail.widget";
