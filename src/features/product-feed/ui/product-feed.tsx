@@ -8,6 +8,7 @@ import {
     ProductGrid,
 } from "@/src/entites/product";
 import { Button } from "@/shared/ui";
+import { AddToCartButton } from "@/src/features/add-to-cart";
 import { loadMoreProducts } from "../actions/load-more.action";
 
 interface ProductFeedProps {
@@ -15,6 +16,7 @@ interface ProductFeedProps {
     initialCursor: string | null;
     total: number;
     params: CatalogParams;
+    withAddToCart?: boolean;
 }
 
 export function ProductFeed({
@@ -22,6 +24,7 @@ export function ProductFeed({
     initialCursor,
     total,
     params,
+    withAddToCart,
 }: ProductFeedProps) {
     const [items, setItems] = useState(initialItems);
     const [cursor, setCursor] = useState(initialCursor);
@@ -67,7 +70,15 @@ export function ProductFeed({
         <div className="space-y-6">
             <ProductGrid>
                 {items.map((p) => (
-                    <ProductCard key={p.id} product={p} />
+                    <ProductCard
+                        key={p.id}
+                        product={p}
+                        actionSlot={
+                            withAddToCart ? (
+                                <AddToCartButton product={p} />
+                            ) : undefined
+                        }
+                    />
                 ))}
                 {status === "loading" &&
                     Array.from({ length: 5 }).map((_, i) => (

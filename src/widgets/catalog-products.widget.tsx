@@ -36,6 +36,7 @@ export function CatalogProductsWidget({
                 </div>
             ) : (
                 <ProductFeed
+                    withAddToCart
                     key={catalogParamsKey(params)}
                     initialItems={page.items}
                     initialCursor={page.nextCursor}
