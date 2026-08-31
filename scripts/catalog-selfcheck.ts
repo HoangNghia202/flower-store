@@ -4,6 +4,9 @@ import {
     buildCatalogHref,
     catalogParamsKey,
     hasActiveFilters,
+    mapProductCard,
+    mapProductDetail,
+    PLACEHOLDER_IMAGE,
 } from "../src/entites/product/model";
 
 // --- parseCatalogParams ---
@@ -77,5 +80,37 @@ assert.notEqual(
 assert.equal(hasActiveFilters({ sort: "newest" }), false);
 assert.equal(hasActiveFilters({ sort: "price-asc" }), false); // sort is not a "filter"
 assert.equal(hasActiveFilters({ sort: "newest", color: "Red" }), true);
+
+// --- mapProductCard / mapProductDetail ---
+{
+    const vm = mapProductCard({
+        id: "p1", name: "Rose Garden", slug: "rose-garden", price: 320000,
+        images: [], stock: 0, isFeatured: true, category: { name: "Birthday", slug: "birthday" },
+    });
+    assert.equal(vm.image, PLACEHOLDER_IMAGE);
+    assert.equal(vm.hasImage, false);
+    assert.equal(vm.inStock, false);
+    assert.equal(vm.categoryName, "Birthday");
+}
+{
+    const vm = mapProductCard({
+        id: "p2", name: "Tulip Mix", slug: "tulip-mix", price: 280000,
+        images: ["https://cdn.example/a.jpg", "https://cdn.example/b.jpg"],
+        stock: 5, isFeatured: false, category: { name: "Wedding", slug: "wedding" },
+    });
+    assert.equal(vm.image, "https://cdn.example/a.jpg");
+    assert.equal(vm.hasImage, true);
+    assert.equal(vm.inStock, true);
+}
+{
+    const vm = mapProductDetail({
+        id: "p3", name: "Lily", slug: "lily", description: "Elegant white lilies.",
+        price: 400000, images: [], stock: 3, isFeatured: false,
+        category: { name: "Sympathy", slug: "sympathy" },
+        stems: [{ quantity: 5, stem: { name: "White Lily", color: "white" } }],
+    });
+    assert.equal(vm.categorySlug, "sympathy");
+    assert.deepEqual(vm.stems, [{ name: "White Lily", color: "white", quantity: 5 }]);
+}
 
 console.log("catalog-selfcheck: OK");
