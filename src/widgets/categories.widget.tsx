@@ -3,12 +3,54 @@ import { GradientOrb } from "@/shared/ui/gradient-orb";
 import { ScrollReveal } from "@/shared/components/scroll-reveal";
 
 const categories = [
-    { id: 1, name: "Birthday", emoji: "🎂", bg: "from-pink-100 to-rose-200", count: "120+ designs" },
-    { id: 2, name: "Wedding", emoji: "💍", bg: "from-violet-100 to-purple-200", count: "85+ designs" },
-    { id: 3, name: "Anniversary", emoji: "💝", bg: "from-red-100 to-pink-200", count: "60+ designs" },
-    { id: 4, name: "Sympathy", emoji: "🕊️", bg: "from-slate-100 to-gray-200", count: "40+ designs" },
-    { id: 5, name: "Graduation", emoji: "🎓", bg: "from-emerald-100 to-teal-200", count: "35+ designs" },
-    { id: 6, name: "Just Because", emoji: "🌷", bg: "from-orange-100 to-amber-200", count: "200+ designs" },
+    {
+        id: 1,
+        name: "Birthday",
+        slug: "birthday",
+        emoji: "🎂",
+        bg: "from-pink-100 to-rose-200",
+        count: "120+ designs",
+    },
+    {
+        id: 2,
+        name: "Wedding",
+        slug: "wedding",
+        emoji: "💍",
+        bg: "from-violet-100 to-purple-200",
+        count: "85+ designs",
+    },
+    {
+        id: 3,
+        name: "Anniversary",
+        slug: "anniversary",
+        emoji: "💝",
+        bg: "from-red-100 to-pink-200",
+        count: "60+ designs",
+    },
+    {
+        id: 4,
+        name: "Sympathy",
+        slug: "sympathy",
+        emoji: "🕊️",
+        bg: "from-slate-100 to-gray-200",
+        count: "40+ designs",
+    },
+    {
+        id: 5,
+        name: "Graduation",
+        slug: "graduation",
+        emoji: "🎓",
+        bg: "from-emerald-100 to-teal-200",
+        count: "35+ designs",
+    },
+    {
+        id: 6,
+        name: "Just Because",
+        slug: "just-because",
+        emoji: "🌷",
+        bg: "from-orange-100 to-amber-200",
+        count: "200+ designs",
+    },
 ];
 
 export function CategoriesWidget() {
@@ -32,23 +74,34 @@ export function CategoriesWidget() {
                         Shop by Occasion
                     </h2>
                     <p className="text-gray-500 mt-3 max-w-md mx-auto">
-                        Find the perfect arrangement for every special moment in life.
+                        Find the perfect arrangement for every special moment in
+                        life.
                     </p>
                 </ScrollReveal>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                     {categories.map((cat, i) => (
-                        <ScrollReveal key={cat.id} animation="fade-up" delay={i * 75}>
+                        <ScrollReveal
+                            key={cat.id}
+                            animation="fade-up"
+                            delay={i * 75}
+                        >
                             <Link
-                                href={`/catalog?occasion=${cat.name.toLowerCase().replace(/ /g, "-")}`}
+                                href={`/catalog?category=${cat.slug}`}
                                 className="group block"
                             >
                                 <div
                                     className={`bg-gradient-to-br ${cat.bg} rounded-2xl p-6 text-center transition-all duration-200 group-hover:-translate-y-1.5 group-hover:shadow-lg group-hover:shadow-pink-100`}
                                 >
-                                    <div className="text-4xl mb-3 select-none">{cat.emoji}</div>
-                                    <div className="font-semibold text-gray-800 text-sm">{cat.name}</div>
-                                    <div className="text-xs text-gray-500 mt-1">{cat.count}</div>
+                                    <div className="text-4xl mb-3 select-none">
+                                        {cat.emoji}
+                                    </div>
+                                    <div className="font-semibold text-gray-800 text-sm">
+                                        {cat.name}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                        {cat.count}
+                                    </div>
                                 </div>
                             </Link>
                         </ScrollReveal>
