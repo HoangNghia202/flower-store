@@ -26,6 +26,14 @@ assert.deepEqual(
 assert.equal(parseCatalogParams({ q: ["rose", "tulip"] }).q, "rose");
 // blank strings are dropped
 assert.equal(parseCatalogParams({ category: "" }).category, undefined);
+// blank numeric params are treated as absent (not coerced to 0)
+assert.equal(
+    parseCatalogParams({ minPrice: "", maxPrice: "" }).minPrice,
+    undefined,
+);
+assert.deepEqual(parseCatalogParams({ minPrice: "", maxPrice: "" }), {
+    sort: "newest",
+});
 
 // --- buildCatalogHref ---
 assert.equal(

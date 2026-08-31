@@ -11,7 +11,13 @@ export type CatalogSort = (typeof CATALOG_SORTS)[number]["value"];
 
 const optionalString = z.string().trim().min(1).optional().catch(undefined);
 
-const optionalMoney = z.coerce.number().int().min(0).optional().catch(undefined);
+const optionalMoney = z
+    .preprocess(
+        (v) => (v === "" ? undefined : v),
+        z.coerce.number().int().min(0),
+    )
+    .optional()
+    .catch(undefined);
 
 export const catalogParamsSchema = z.object({
     category: optionalString,
