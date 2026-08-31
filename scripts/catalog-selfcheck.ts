@@ -7,6 +7,10 @@ import {
     mapProductCard,
     mapProductDetail,
     PLACEHOLDER_IMAGE,
+    toPrismaWhere,
+    toPrismaOrderBy,
+    encodeCursor,
+    decodeCursor,
 } from "../src/entites/product/model";
 
 // --- parseCatalogParams ---
@@ -112,5 +116,64 @@ assert.equal(hasActiveFilters({ sort: "newest", color: "Red" }), true);
     assert.equal(vm.categorySlug, "sympathy");
     assert.deepEqual(vm.stems, [{ name: "White Lily", color: "white", quantity: 5 }]);
 }
+
+// --- toPrismaWhere ---
+assert.deepEqual(toPrismaWhere({ sort: "newest" }), {});
+assert.deepEqual(toPrismaWhere({ sort: "newest", category: "birthday" }), {
+    category: { slug: "birthday" },
+});
+assert.deepEqual(toPrismaWhere({ sort: "newest", color: "Red" }), {
+    stems: {
+        some: { stem: { color: { equals: "Red", mode: "insensitive" } } },
+    },
+});
+assert.deepEqual(toPrismaWhere({ sort: "newest", q: "rose" }), {
+    name: { contains: "rose", mode: "insensitive" },
+});
+assert.deepEqual(
+    toPrismaWhere({ sort: "newest", minPrice: 100000, maxPrice: 500000 }),
+    { price: { gte: 100000, lte: 500000 } },
+);
+// swapped bounds get normalised
+assert.deepEqual(
+    toPrismaWhere({ sort: "newest", minPrice: 500000, maxPrice: 100000 }),
+    { price: { gte: 100000, lte: 500000 } },
+);
+assert.deepEqual(toPrismaWhere({ sort: "newest", minPrice: 100000 }), {
+    price: { gte: 100000 },
+});
+assert.deepEqual(toPrismaWhere({ sort: "newest", maxPrice: 500000 }), {
+    price: { lte: 500000 },
+});
+
+// --- toPrismaOrderBy ---
+assert.deepEqual(toPrismaOrderBy({ sort: "newest" }), [
+    { createdAt: "desc" },
+    { id: "desc" },
+]);
+assert.deepEqual(toPrismaOrderBy({ sort: "price-asc" }), [
+    { price: "asc" },
+    { id: "asc" },
+]);
+assert.deepEqual(toPrismaOrderBy({ sort: "price-desc" }), [
+    { price: "desc" },
+    { id: "desc" },
+]);
+assert.deepEqual(toPrismaOrderBy({ sort: "featured" }), [
+    { isFeatured: "desc" },
+    { id: "desc" },
+]);
+
+// --- encodeCursor / decodeCursor round-trip ---
+{
+    const cur = encodeCursor("clh9x2k7p0000abcd1234wxyz");
+    assert.equal(typeof cur, "string");
+    assert.ok(!/[+/=]/.test(cur)); // base64url, no padding
+    assert.equal(decodeCursor(cur), "clh9x2k7p0000abcd1234wxyz");
+}
+// malformed cursors decode to null
+assert.equal(decodeCursor("not valid !!"), null);
+assert.equal(decodeCursor("@@@"), null);
+assert.equal(decodeCursor(""), null);
 
 console.log("catalog-selfcheck: OK");
