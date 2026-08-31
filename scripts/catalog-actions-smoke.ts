@@ -1,3 +1,5 @@
+// Run with:  npx tsx --conditions=react-server scripts/catalog-actions-smoke.ts
+// (the react-server export condition resolves `server-only` to its empty module)
 import "dotenv/config";
 import { getProducts } from "../src/entites/product/actions/get-products";
 import { getCatalogFacets } from "../src/entites/product/actions/get-catalog-facets";

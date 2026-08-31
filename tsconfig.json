@@ -21,9 +21,6 @@
         ],
         "paths": {
             "@/*": ["./*"],
-            "server-only": [
-                "./node_modules/next/dist/compiled/server-only/empty.js"
-            ],
             "@/shared/*": ["./src/shared/*"],
             "@/_app/*": ["./src/_app/*"],
             "@/_pages/*": ["./src/_pages/*"],
