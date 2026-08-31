@@ -7,3 +7,5 @@ export * from "./testimonials.widget";
 export * from "./custom-bouquet.widget";
 export * from "./newsletter.widget";
 export * from "./footer.widget";
+export * from "./catalog-filter.widget";
+export * from "./catalog-products.widget";
