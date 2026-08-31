@@ -22,6 +22,7 @@ function ProductCardBase({ product, actionSlot }: ProductCardProps) {
         >
             <Link
                 href={`/catalog/${product.slug}`}
+                aria-label={product.name}
                 className="relative block aspect-[4/5] overflow-hidden bg-gradient-to-br from-pink-100 to-violet-100"
             >
                 {product.hasImage ? (
@@ -37,6 +38,7 @@ function ProductCardBase({ product, actionSlot }: ProductCardProps) {
                     />
                 ) : (
                     <span
+                        aria-hidden="true"
                         className={cn(
                             "absolute inset-0 flex items-center justify-center text-6xl select-none",
                             !product.inStock && "opacity-50 grayscale",

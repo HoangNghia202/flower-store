@@ -37,15 +37,16 @@ export async function getProducts(query: CatalogQuery): Promise<ProductPage> {
 
     const cursorId = query.cursor ? decodeCursor(query.cursor) : null;
 
-    const rows = await prisma.product.findMany({
-        where,
-        orderBy,
-        select: CARD_SELECT,
-        take: PRODUCTS_PAGE_SIZE + 1,
-        ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
-    });
-
-    const total = await prisma.product.count({ where });
+    const [rows, total] = await Promise.all([
+        prisma.product.findMany({
+            where,
+            orderBy,
+            select: CARD_SELECT,
+            take: PRODUCTS_PAGE_SIZE + 1,
+            ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
+        }),
+        prisma.product.count({ where }),
+    ]);
 
     const hasMore = rows.length > PRODUCTS_PAGE_SIZE;
     const pageRows = hasMore ? rows.slice(0, PRODUCTS_PAGE_SIZE) : rows;

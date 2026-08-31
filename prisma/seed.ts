@@ -92,11 +92,17 @@ function slugify(s: string): string {
 }
 
 async function main() {
+    if (process.env.NODE_ENV === "production") {
+        throw new Error("refusing to seed a production database");
+    }
+
     // Idempotent: wipe catalog tables (dev only) in FK-safe order, then recreate.
-    await prisma.productStem.deleteMany();
-    await prisma.product.deleteMany();
-    await prisma.stem.deleteMany();
-    await prisma.category.deleteMany();
+    await prisma.$transaction([
+        prisma.productStem.deleteMany(),
+        prisma.product.deleteMany(),
+        prisma.stem.deleteMany(),
+        prisma.category.deleteMany(),
+    ]);
 
     const categories = await Promise.all(
         CATEGORIES.map((c) => prisma.category.create({ data: c })),
@@ -162,6 +168,8 @@ async function main() {
 main()
     .catch((e) => {
         console.error(e);
-        process.exit(1);
+        process.exitCode = 1;
     })
-    .finally(() => prisma.$disconnect());
+    .finally(async () => {
+        await prisma.$disconnect();
+    });

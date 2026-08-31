@@ -10,6 +10,7 @@ export async function loadMoreProducts(
     query: CatalogParams,
     cursor: string,
 ): Promise<ProductPage> {
-    const parsed = catalogParamsSchema.parse(query);
+    const result = catalogParamsSchema.safeParse(query);
+    const parsed = result.success ? result.data : catalogParamsSchema.parse({});
     return getProducts({ ...parsed, cursor });
 }

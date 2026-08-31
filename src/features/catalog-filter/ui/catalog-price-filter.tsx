@@ -20,6 +20,20 @@ export function CatalogPriceFilter({ params }: { params: CatalogParams }) {
     const [min, setMin] = useState(params.minPrice?.toString() ?? "");
     const [max, setMax] = useState(params.maxPrice?.toString() ?? "");
 
+    // Re-sync local state when the URL changes elsewhere (the ✕ on the price
+    // pill, "Clear all", browser back/forward). Compare against the previous
+    // prop during render instead of writing state from an effect body.
+    const [syncedMin, setSyncedMin] = useState(params.minPrice);
+    if (params.minPrice !== syncedMin) {
+        setSyncedMin(params.minPrice);
+        setMin(params.minPrice?.toString() ?? "");
+    }
+    const [syncedMax, setSyncedMax] = useState(params.maxPrice);
+    if (params.maxPrice !== syncedMax) {
+        setSyncedMax(params.maxPrice);
+        setMax(params.maxPrice?.toString() ?? "");
+    }
+
     function apply() {
         const toNum = (s: string) => {
             const n = Number(s);

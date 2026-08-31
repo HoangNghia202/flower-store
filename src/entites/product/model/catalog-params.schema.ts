@@ -13,7 +13,7 @@ const optionalString = z.string().trim().min(1).optional().catch(undefined);
 
 const optionalMoney = z
     .preprocess(
-        (v) => (v === "" ? undefined : v),
+        (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
         z.coerce.number().int().min(0),
     )
     .optional()
@@ -68,7 +68,7 @@ export function catalogParamsToSearchParams(p: CatalogParams): URLSearchParams {
 }
 
 export function catalogParamsKey(p: CatalogParams): string {
-    return catalogParamsToSearchParams(p).toString();
+    return "catalog:" + catalogParamsToSearchParams(p).toString();
 }
 
 export function hasActiveFilters(p: CatalogParams): boolean {
