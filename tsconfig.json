@@ -23,7 +23,8 @@
             "@/*": ["./*"],
             "@/shared/*": ["./src/shared/*"],
             "@/_app/*": ["./src/_app/*"],
-            "@/_pages/*": ["./src/_pages/*"]
+            "@/_pages/*": ["./src/_pages/*"],
+            "@/widgets/*": ["./src/widgets/*"]
         }
     },
     "include": [

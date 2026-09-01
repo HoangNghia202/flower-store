@@ -1,162 +1,51 @@
 "use client";
 
 import * as React from "react";
-import { NavProjects } from "@/shared/components/nav-projects";
-import { TeamSwitcher } from "@/shared/components/team-switcher";
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarRail,
-} from "@/shared/ui";
-import {
-    AudioLinesIcon,
-    BookOpenIcon,
-    BotIcon,
-    GalleryVerticalEndIcon,
-    ListPlusIcon,
-    Settings2Icon,
-    TerminalIcon,
-    TerminalSquareIcon,
-    VectorSquareIcon,
-} from "lucide-react";
-import { APP_PAGE } from "@/shared/lib/constants/app-page.const";
+import {PageNavigators} from "@/shared/components/page-navigators";
+import {Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail,} from "@/shared/ui";
+import {ListPlusIcon, VectorSquareIcon,} from "lucide-react";
+import {APP_PAGE} from "@/shared/lib/constants/app-page.const";
+import {usePathname} from "next/navigation";
+import {NavigationItemVM} from "@/shared/lib/models";
+import {useUserStore} from "@/_app/store/useUserStore";
+import {UserRole} from "@/prisma/generated/enums";
 
-// This is sample data.
-const data = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
-    teams: [
+
+const navUserItems: NavigationItemVM[] =
+    [
         {
-            name: "Acme Inc",
-            logo: <GalleryVerticalEndIcon />,
-            plan: "Enterprise",
+        name: "Catalog",
+        url: APP_PAGE.Catalog,
+        icon: <ListPlusIcon />,
+        isActive:false
         },
         {
-            name: "Acme Corp.",
-            logo: <AudioLinesIcon />,
-            plan: "Startup",
+        name: "Custom Bouquet",
+        url: APP_PAGE.CustomBouquet,
+        icon: <VectorSquareIcon />,
+        isActive:false
         },
-        {
-            name: "Evil Corp.",
-            logo: <TerminalIcon />,
-            plan: "Free",
-        },
-    ],
-    navMain: [
-        {
-            title: "Playground",
-            url: "#",
-            icon: <TerminalSquareIcon />,
-            isActive: true,
-            items: [
-                {
-                    title: "History",
-                    url: "#",
-                },
-                {
-                    title: "Starred",
-                    url: "#",
-                },
-                {
-                    title: "Settings",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Models",
-            url: "#",
-            icon: <BotIcon />,
-            items: [
-                {
-                    title: "Genesis",
-                    url: "#",
-                },
-                {
-                    title: "Explorer",
-                    url: "#",
-                },
-                {
-                    title: "Quantum",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Documentation",
-            url: "#",
-            icon: <BookOpenIcon />,
-            items: [
-                {
-                    title: "Introduction",
-                    url: "#",
-                },
-                {
-                    title: "Get Started",
-                    url: "#",
-                },
-                {
-                    title: "Tutorials",
-                    url: "#",
-                },
-                {
-                    title: "Changelog",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Settings",
-            url: "#",
-            icon: <Settings2Icon />,
-            items: [
-                {
-                    title: "General",
-                    url: "#",
-                },
-                {
-                    title: "Team",
-                    url: "#",
-                },
-                {
-                    title: "Billing",
-                    url: "#",
-                },
-                {
-                    title: "Limits",
-                    url: "#",
-                },
-            ],
-        },
-    ],
-    projects: [
-        {
-            name: "Catalog",
-            url: APP_PAGE.Catalog,
-            icon: <ListPlusIcon />,
-        },
-        {
-            name: "Custom Bouquet",
-            url: APP_PAGE.CustomBouquet,
-            icon: <VectorSquareIcon />,
-        },
-    ],
-};
+    ]
+
+
+const navAdminItems: NavigationItemVM[] =[]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const user = useUserStore(state => state.user)
+    const location  = usePathname();
+
+    const navigateItems = (user?.roles.includes(UserRole.ADMIN)? navAdminItems: navUserItems).map((item) => ({
+        ...item,
+        isActive: location.includes(item.url),
+    }));
+
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
-                <TeamSwitcher teams={data.teams} />
+                {/*NOTE: Store logo image here*/}
             </SidebarHeader>
             <SidebarContent>
-                {/*<NavMain items={data.navMain} />*/}
-                <NavProjects projects={data.projects} />
+                <PageNavigators navItems={navigateItems} />
             </SidebarContent>
             <SidebarFooter>{props.children}</SidebarFooter>
             <SidebarRail />

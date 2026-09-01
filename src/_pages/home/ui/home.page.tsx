@@ -1,23 +1,32 @@
-import { Navbar } from "@/src/widgets/navbar";
-import { Initializer } from "@/_app/initializer/initializer";
-import { HeroSection } from "./sections/hero.section";
-import { StatsSection } from "./sections/stats.section";
-import { FeaturedProductsSection } from "./sections/featured-products.section";
-import { CategoriesSection } from "./sections/categories.section";
-import { WhyChooseUsSection } from "./sections/why-choose-us.section";
+import { LandingNavbar } from "./landing-navbar";
+import {
+    HeroWidget,
+    TrustBarWidget,
+    CategoriesWidget,
+    FeaturedProductsWidget,
+    HowItWorksWidget,
+    TestimonialsWidget,
+    CustomBouquetWidget,
+    NewsletterWidget,
+    FooterWidget,
+} from "@/widgets/index";
 
 export function Home() {
     return (
-        <Initializer>
-            <Navbar />
-            <main>
-                <HeroSection />
-                <StatsSection />
-                <FeaturedProductsSection />
-                <CategoriesSection />
-                <WhyChooseUsSection />
-            </main>
-        </Initializer>
+        <main className="overflow-hidden">
+            <LandingNavbar />
+            <HeroWidget />
+            <TrustBarWidget />
+            <CategoriesWidget />
+            <FeaturedProductsWidget />
+            <HowItWorksWidget />
+            <TestimonialsWidget />
+            <CustomBouquetWidget />
+            <NewsletterWidget />
+            <FooterWidget />
+        </main>
     );
 }
+
+
 

@@ -6,6 +6,7 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
+        "db:seed": "tsx prisma/seed.ts",
         "lint": "eslint",
         "format": "prettier --write \"**/*.{js,mjs,cjs,ts,tsx,json,md,css,prisma}\"",
         "format:check": "prettier --check \"**/*.{js,mjs,cjs,ts,tsx,json,md,css,prisma}\""
@@ -42,7 +43,9 @@
         "prettier": "^3.8.4",
         "prettier-plugin-prisma": "^5.0.0",
         "prisma": "^7.8.0",
+        "server-only": "^0.0.1",
         "tailwindcss": "^4",
+        "tsx": "^4.23.13",
         "typescript": "^5"
     }
 }
