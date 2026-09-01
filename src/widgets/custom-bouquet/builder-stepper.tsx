@@ -20,9 +20,7 @@ export function BuilderStepper({ current }: { current: number }) {
                                 done && "bg-pink-500 text-white",
                                 active &&
                                     "bg-pink-500 text-white ring-4 ring-pink-100",
-                                !done &&
-                                    !active &&
-                                    "bg-gray-100 text-gray-400",
+                                !done && !active && "bg-gray-100 text-gray-400",
                             )}
                         >
                             {done ? <Check size={16} /> : stepNo}

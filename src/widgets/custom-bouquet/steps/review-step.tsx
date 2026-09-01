@@ -22,9 +22,7 @@ export function ReviewStep() {
     const wrap = useCustomBouquetStore((s) => s.selectedWrap);
     const ribbon = useCustomBouquetStore((s) => s.selectedRibbon);
     const generatedImage = useCustomBouquetStore((s) => s.generatedImage);
-    const setGeneratedImage = useCustomBouquetStore(
-        (s) => s.setGeneratedImage,
-    );
+    const setGeneratedImage = useCustomBouquetStore((s) => s.setGeneratedImage);
     const totalPrice = useCustomBouquetStore((s) => s.getBuilderTotalPrice());
     const resetBuilder = useCustomBouquetStore((s) => s.resetBuilder);
 
@@ -44,12 +42,8 @@ export function ReviewStep() {
                 color: s.color,
                 quantity: s.quantity,
             })),
-            wrapPaper: wrap
-                ? { name: wrap.name, color: wrap.color }
-                : null,
-            ribbon: ribbon
-                ? { name: ribbon.name, color: ribbon.color }
-                : null,
+            wrapPaper: wrap ? { name: wrap.name, color: wrap.color } : null,
+            ribbon: ribbon ? { name: ribbon.name, color: ribbon.color } : null,
         };
 
         setIsGenerating(true);
@@ -127,11 +121,7 @@ export function ReviewStep() {
                             <p className="text-sm text-gray-500">
                                 Couldn&apos;t generate the preview.
                             </p>
-                            <Button
-                                type="button"
-                                size="sm"
-                                onClick={retry}
-                            >
+                            <Button type="button" size="sm" onClick={retry}>
                                 Try again
                             </Button>
                         </div>

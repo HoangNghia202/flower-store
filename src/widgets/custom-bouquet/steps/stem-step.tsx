@@ -81,10 +81,7 @@ export function StemStep({ stems }: { stems: StemVM[] }) {
                                         className="px-2 py-1 disabled:opacity-40"
                                         disabled={qty <= 0}
                                         onClick={() =>
-                                            updateStemQuantity(
-                                                stem.id,
-                                                qty - 1,
-                                            )
+                                            updateStemQuantity(stem.id, qty - 1)
                                         }
                                     >
                                         <Minus size={14} />

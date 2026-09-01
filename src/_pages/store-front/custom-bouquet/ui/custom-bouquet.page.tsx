@@ -19,8 +19,8 @@ export async function CustomBouquetPage() {
                     Design Your Own Bouquet
                 </h1>
                 <p className="mt-2 text-gray-500">
-                    Choose your stems, wrap, and ribbon — we&apos;ll show
-                    you a preview.
+                    Choose your stems, wrap, and ribbon — we&apos;ll show you a
+                    preview.
                 </p>
             </header>
             <BouquetBuilderWidget

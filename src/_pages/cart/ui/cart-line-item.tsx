@@ -74,9 +74,7 @@ export function CartLineItem({ item }: { item: CartItem }) {
                 {isCustom && (
                     <ul className="mt-1 space-y-0.5 text-xs text-gray-400">
                         <li>Wrap: {item.customDetails!.wrapPaper || "—"}</li>
-                        <li>
-                            Ribbon: {item.customDetails!.ribbon || "—"}
-                        </li>
+                        <li>Ribbon: {item.customDetails!.ribbon || "—"}</li>
                         <li>
                             {item
                                 .customDetails!.stems.map(

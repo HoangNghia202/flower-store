@@ -6,15 +6,15 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --color-brand-navy:  #0A2947;
-    --color-brand-cream: #F3E4C9;
-    --color-brand-sage:  #D3D4C0;
-    --color-brand-earth: #8B5E3C;
+    --color-brand-navy: #0a2947;
+    --color-brand-cream: #f3e4c9;
+    --color-brand-sage: #d3d4c0;
+    --color-brand-earth: #8b5e3c;
 
     /* Landing page pink palette */
-    --color-brand-rose:  #E8779A;
-    --color-brand-blush: #FBE2EA;
-    --color-brand-peach: #F5C4A8;
+    --color-brand-rose: #e8779a;
+    --color-brand-blush: #fbe2ea;
+    --color-brand-peach: #f5c4a8;
 
     --font-display: "Playfair Display", Georgia, serif;
 
@@ -206,11 +206,21 @@
     opacity: 0;
     animation: hero-in-up 0.65s cubic-bezier(0, 0, 0.2, 1) forwards;
 }
-.hero-anim-1 { animation-delay: 0.05s; }
-.hero-anim-2 { animation-delay: 0.2s; }
-.hero-anim-3 { animation-delay: 0.35s; }
-.hero-anim-4 { animation-delay: 0.5s; }
-.hero-anim-5 { animation-delay: 0.65s; }
+.hero-anim-1 {
+    animation-delay: 0.05s;
+}
+.hero-anim-2 {
+    animation-delay: 0.2s;
+}
+.hero-anim-3 {
+    animation-delay: 0.35s;
+}
+.hero-anim-4 {
+    animation-delay: 0.5s;
+}
+.hero-anim-5 {
+    animation-delay: 0.65s;
+}
 
 .hero-anim-right {
     opacity: 0;

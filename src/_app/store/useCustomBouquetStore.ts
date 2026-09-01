@@ -52,8 +52,7 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
     nextStep: () =>
         set((state) => ({ step: Math.min(LAST_STEP, state.step + 1) })),
     prevStep: () => set((state) => ({ step: Math.max(1, state.step - 1) })),
-    setStep: (step) =>
-        set({ step: Math.min(LAST_STEP, Math.max(1, step)) }),
+    setStep: (step) => set({ step: Math.min(LAST_STEP, Math.max(1, step)) }),
 
     addStem: (stem) => {
         const current = get().selectedStems;

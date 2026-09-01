@@ -27,9 +27,7 @@ export function BouquetSummary() {
             <p
                 className={cn(
                     "mt-1 text-sm",
-                    totalStems >= MIN_STEMS
-                        ? "text-pink-600"
-                        : "text-gray-400",
+                    totalStems >= MIN_STEMS ? "text-pink-600" : "text-gray-400",
                 )}
             >
                 {totalStems} stem{totalStems === 1 ? "" : "s"}
@@ -53,18 +51,12 @@ export function BouquetSummary() {
             <dl className="mt-3 space-y-1 border-t pt-3 text-sm text-gray-600">
                 <div className="flex justify-between">
                     <dt>Wrap</dt>
-                    <dd>
-                        {wrap
-                            ? `${wrap.name} · ${vnd(wrap.price)}`
-                            : "—"}
-                    </dd>
+                    <dd>{wrap ? `${wrap.name} · ${vnd(wrap.price)}` : "—"}</dd>
                 </div>
                 <div className="flex justify-between">
                     <dt>Ribbon</dt>
                     <dd>
-                        {ribbon
-                            ? `${ribbon.name} · ${vnd(ribbon.price)}`
-                            : "—"}
+                        {ribbon ? `${ribbon.name} · ${vnd(ribbon.price)}` : "—"}
                     </dd>
                 </div>
             </dl>
