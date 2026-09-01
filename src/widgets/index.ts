@@ -4,7 +4,7 @@ export * from "./landing-page/categories.widget";
 export * from "./landing-page/featured-products.widget";
 export * from "./landing-page/how-it-works.widget";
 export * from "./landing-page/testimonials.widget";
-export * from "./custom-bouquet/custom-bouquet.widget";
+export * from "./custom-bouquet";
 export * from "./landing-page/newsletter.widget";
 export * from "./landing-page/footer.widget";
 export * from "./catalog/catalog-filter.widget";
