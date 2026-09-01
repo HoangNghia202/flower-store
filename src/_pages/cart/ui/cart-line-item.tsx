@@ -16,11 +16,19 @@ export function CartLineItem({ item }: { item: CartItem }) {
     );
     const lineTotal = (item.price + addonsTotal) * item.quantity;
     const hasImage = Boolean(item.image) && item.image !== PLACEHOLDER_IMAGE;
+    const isCustom = Boolean(item.isCustomBouquet && item.customDetails);
 
     return (
         <div className="flex gap-4 py-4">
             <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-pink-100 to-violet-100">
-                {hasImage ? (
+                {isCustom && item.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={item.image}
+                        alt={item.name}
+                        className="absolute inset-0 h-full w-full object-cover"
+                    />
+                ) : hasImage ? (
                     <Image
                         src={item.image}
                         alt={item.name}
@@ -37,12 +45,18 @@ export function CartLineItem({ item }: { item: CartItem }) {
 
             <div className="flex flex-1 flex-col">
                 <div className="flex items-start justify-between gap-2">
-                    <Link
-                        href={`/catalog/${item.slug}`}
-                        className="line-clamp-2 font-medium text-gray-800 hover:text-pink-600"
-                    >
-                        {item.name}
-                    </Link>
+                    {isCustom ? (
+                        <span className="line-clamp-2 font-medium text-gray-800">
+                            {item.name}
+                        </span>
+                    ) : (
+                        <Link
+                            href={`/catalog/${item.slug}`}
+                            className="line-clamp-2 font-medium text-gray-800 hover:text-pink-600"
+                        >
+                            {item.name}
+                        </Link>
+                    )}
                     <button
                         type="button"
                         aria-label={`Remove ${item.name}`}
@@ -56,6 +70,22 @@ export function CartLineItem({ item }: { item: CartItem }) {
                 <p className="mt-0.5 text-sm text-gray-500">
                     {item.price.toLocaleString("vi-VN")}₫
                 </p>
+
+                {isCustom && (
+                    <ul className="mt-1 space-y-0.5 text-xs text-gray-400">
+                        <li>Wrap: {item.customDetails!.wrapPaper || "—"}</li>
+                        <li>
+                            Ribbon: {item.customDetails!.ribbon || "—"}
+                        </li>
+                        <li>
+                            {item
+                                .customDetails!.stems.map(
+                                    (s) => `${s.quantity}× ${s.name}`,
+                                )
+                                .join(" · ")}
+                        </li>
+                    </ul>
+                )}
 
                 {(item.addons ?? []).length > 0 && (
                     <ul className="mt-1 space-y-0.5 text-xs text-gray-400">
