@@ -14,6 +14,7 @@ export async function StoreFrontLayout({
         name: "shadcn",
         email: "m@example.com",
         avatar: "/avatars/shadcn.jpg",
+        roles: [],
     };
     return (
         <Initializer>

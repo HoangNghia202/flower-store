@@ -1,19 +1,20 @@
-"use client";
-
-import { SignupForm } from "./signup-form";
 import { signUpAction, signInWithGoogle } from "@/src/entites/user/actions";
-import { useSearchParams } from "next/navigation";
+import { safeRedirectPath } from "@/src/entites/user/model";
+import { SignupForm } from "./signup-form";
 
-export function SignupPage() {
-    const searchParams = useSearchParams();
-    const redirectTo = searchParams.get("redirectUrl") ?? "/catalog";
+export async function SignupPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+    const redirectTo = safeRedirectPath((await searchParams).redirectUrl);
 
     return (
         <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
             <div className="w-full max-w-sm md:max-w-4xl">
                 <SignupForm
                     signUpAction={signUpAction}
-                    onSignInWithGoogle={() => signInWithGoogle(redirectTo)}
+                    onSignInWithGoogle={signInWithGoogle}
                     redirectTo={redirectTo}
                 />
             </div>

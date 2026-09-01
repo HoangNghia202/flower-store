@@ -28,7 +28,7 @@ type Props = React.ComponentProps<"div"> & {
         state: AuthActionState | null,
         data: FormData,
     ) => Promise<AuthActionState>;
-    onSignInWithGoogle: () => void;
+    onSignInWithGoogle: (redirectUrl?:string) => void;
     redirectTo?: string;
 };
 
@@ -206,7 +206,7 @@ export function SignupForm({
                                 <Button
                                     variant="outline"
                                     type="button"
-                                    onClick={onSignInWithGoogle}
+                                    onClick={() => onSignInWithGoogle(redirectTo)}
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
