@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, ShoppingBag, Heart, Flower } from "lucide-react";
+import { Menu, X, Heart, Flower } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
+import { ViewCartButton } from "@/src/features/view-cart";
 
 const navLinks = [
     { href: "#categories", label: "Collections" },
@@ -65,12 +66,7 @@ export function LandingNavbar() {
                         >
                             <Heart size={20} />
                         </button>
-                        <button
-                            aria-label="Cart"
-                            className="p-2 text-gray-400 hover:text-pink-500 transition-colors rounded-full hover:bg-pink-50"
-                        >
-                            <ShoppingBag size={20} />
-                        </button>
+                        <ViewCartButton className="text-gray-400 hover:text-pink-500" />
                         <Button
                             asChild
                             size="sm"
