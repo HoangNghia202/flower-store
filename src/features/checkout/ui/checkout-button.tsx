@@ -1,36 +1,23 @@
 "use client";
 
-import { useState } from "react";
 import { CreditCard } from "lucide-react";
 import { Button } from "@/shared/ui";
-import { useCartStore } from "@/_app/store/useCartStore";
-import { PaymentSuccessDialog } from "./payment-success-dialog";
 
 /**
- * Placeholder checkout. Real payment is a later feature; for now it clears the
- * cart and shows {@link PaymentSuccessDialog}.
+ * Placeholder checkout trigger. The parent owns the "paid" state and renders
+ * {@link PaymentSuccessDialog}, because clearing the cart unmounts whatever
+ * lives inside the cart's item-list subtree.
  */
-export function CheckoutButton() {
-    const clearCart = useCartStore((s) => s.clearCart);
-    const [paid, setPaid] = useState(false);
-
-    function handleCheckout() {
-        clearCart();
-        setPaid(true);
-    }
-
+export function CheckoutButton({ onCheckout }: { onCheckout: () => void }) {
     return (
-        <>
-            <Button
-                type="button"
-                size="lg"
-                className="w-full bg-pink-500 hover:bg-pink-600"
-                onClick={handleCheckout}
-            >
-                <CreditCard size={16} className="mr-2" />
-                Checkout
-            </Button>
-            {paid && <PaymentSuccessDialog />}
-        </>
+        <Button
+            type="button"
+            size="lg"
+            className="w-full bg-pink-500 hover:bg-pink-600"
+            onClick={onCheckout}
+        >
+            <CreditCard size={16} className="mr-2" />
+            Checkout
+        </Button>
     );
 }

@@ -1,14 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useHydrated } from "@/shared/hooks";
 import { useCartStore } from "@/_app/store/useCartStore";
-import { CheckoutButton } from "@/src/features/checkout";
+import { CheckoutButton, PaymentSuccessDialog } from "@/src/features/checkout";
 import { CartLineItem } from "./cart-line-item";
 
 export function CartPage() {
     const hydrated = useHydrated();
     const items = useCartStore((s) => s.items);
+    const clearCart = useCartStore((s) => s.clearCart);
+    const [paid, setPaid] = useState(false);
     const subtotal = useCartStore((s) =>
         s.items.reduce((sum, item) => {
             const addons = (item.addons ?? []).reduce(
@@ -18,6 +21,18 @@ export function CartPage() {
             return sum + (item.price + addons) * item.quantity;
         }, 0),
     );
+
+    function handleCheckout() {
+        clearCart();
+        setPaid(true);
+    }
+
+    // Once paid, this must win over every other branch: `clearCart()` empties
+    // `items`, which would otherwise drop us into the empty state and unmount
+    // the dialog before it can show.
+    if (paid) {
+        return <PaymentSuccessDialog />;
+    }
 
     // Cart state lives in a persisted (localStorage) store, so the server and
     // first client paint see an empty cart. Wait for hydration before deciding
@@ -82,7 +97,7 @@ export function CartPage() {
                         Shipping &amp; taxes calculated at checkout.
                     </p>
                     <div className="mt-5">
-                        <CheckoutButton />
+                        <CheckoutButton onCheckout={handleCheckout} />
                     </div>
                 </aside>
             </div>
