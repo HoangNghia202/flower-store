@@ -116,6 +116,11 @@ export function StemStep({ stems }: { stems: StemVM[] }) {
                     );
                 })}
             </div>
+            {stems.length === 0 && (
+                <p className="text-sm text-gray-500">
+                    No stems available right now.
+                </p>
+            )}
         </div>
     );
 }

@@ -50,16 +50,16 @@ export function BouquetBuilderWidget({ stems, wraps, ribbons }: Props) {
                     {step === 4 && <ReviewStep />}
                 </div>
 
-                {step < 4 && (
-                    <div className="mt-8 flex items-center justify-between">
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={prevStep}
-                            className={step === 1 ? "invisible" : ""}
-                        >
-                            Back
-                        </Button>
+                <div className="mt-8 flex items-center justify-between">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={prevStep}
+                        className={step === 1 ? "invisible" : ""}
+                    >
+                        Back
+                    </Button>
+                    {step < 4 && (
                         <Button
                             type="button"
                             onClick={nextStep}
@@ -68,8 +68,8 @@ export function BouquetBuilderWidget({ stems, wraps, ribbons }: Props) {
                         >
                             {step === 3 ? "Review" : "Next"}
                         </Button>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
             <BouquetSummary />

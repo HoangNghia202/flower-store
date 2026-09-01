@@ -57,6 +57,11 @@ export function RibbonStep({ ribbons }: { ribbons: BouquetOptionVM[] }) {
                     );
                 })}
             </div>
+            {ribbons.length === 0 && (
+                <p className="text-sm text-gray-500">
+                    No ribbons available right now.
+                </p>
+            )}
         </div>
     );
 }

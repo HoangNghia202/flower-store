@@ -30,6 +30,7 @@ export function ReviewStep() {
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState(false);
+    const [attempt, setAttempt] = useState(0);
     const startedRef = useRef(false);
 
     useEffect(() => {
@@ -58,11 +59,12 @@ export function ReviewStep() {
             .finally(() => {
                 setIsGenerating(false);
             });
-    }, [generatedImage, stems, wrap, ribbon, setGeneratedImage]);
+    }, [generatedImage, stems, wrap, ribbon, setGeneratedImage, attempt]);
 
     function retry() {
         startedRef.current = false;
-        setGeneratedImage(null);
+        setError(false);
+        setAttempt((n) => n + 1);
     }
 
     function addToCartAndCheckout() {
@@ -90,8 +92,8 @@ export function ReviewStep() {
             },
             1,
         );
-        resetBuilder();
         router.push("/cart");
+        resetBuilder();
     }
 
     return (

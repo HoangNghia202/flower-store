@@ -3,7 +3,7 @@ out
 build
 coverage
 node_modules
-app/generated/prisma
+prisma/generated
 .next/**
 *.log
 .next-env.d.ts

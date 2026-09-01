@@ -62,15 +62,20 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
                 selectedStems: current.map((s) =>
                     s.id === stem.id ? { ...s, quantity: s.quantity + 1 } : s,
                 ),
+                generatedImage: null,
             });
         } else {
-            set({ selectedStems: [...current, { ...stem, quantity: 1 }] });
+            set({
+                selectedStems: [...current, { ...stem, quantity: 1 }],
+                generatedImage: null,
+            });
         }
     },
 
     removeStem: (stemId) => {
         set({
             selectedStems: get().selectedStems.filter((s) => s.id !== stemId),
+            generatedImage: null,
         });
     },
 
@@ -83,11 +88,13 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
             selectedStems: get().selectedStems.map((s) =>
                 s.id === stemId ? { ...s, quantity } : s,
             ),
+            generatedImage: null,
         });
     },
 
-    setWrap: (wrap) => set({ selectedWrap: wrap }),
-    setRibbon: (ribbon) => set({ selectedRibbon: ribbon }),
+    setWrap: (wrap) => set({ selectedWrap: wrap, generatedImage: null }),
+    setRibbon: (ribbon) =>
+        set({ selectedRibbon: ribbon, generatedImage: null }),
     setGeneratedImage: (url) => set({ generatedImage: url }),
 
     resetBuilder: () =>
