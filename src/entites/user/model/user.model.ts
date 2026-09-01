@@ -3,6 +3,7 @@ export class UserVM {
     name: string;
     email: string;
     avatar: string;
+    roles: string[];
 
     constructor(init: Partial<UserVM>) {
         Object.assign(this, init);

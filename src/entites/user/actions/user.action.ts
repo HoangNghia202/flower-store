@@ -98,7 +98,6 @@ export async function loginAction(
     _prevState: AuthActionState | null,
     formData: FormData,
 ): Promise<AuthActionState> {
-    debugger;
     const validationResult = loginFormSchema.safeParse({
         email: formData.get("email"),
         password: formData.get("password"),
@@ -168,5 +167,6 @@ export async function getMeAction() {
         name: user.name || "User",
         email: user.email,
         avatar: "/avatars/default.jpg",
+        roles:[user.role]
     } satisfies UserVM;
 }
