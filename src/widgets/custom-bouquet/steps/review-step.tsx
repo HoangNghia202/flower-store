@@ -38,7 +38,6 @@ export function ReviewStep() {
         if (generatedImage || startedRef.current) return;
         startedRef.current = true;
 
-        let ignore = false;
         const selection: BouquetSelection = {
             stems: stems.map((s) => ({
                 name: s.name,
@@ -57,19 +56,14 @@ export function ReviewStep() {
         setError(false);
         generateBouquetImage(selection)
             .then((res) => {
-                if (ignore) return;
                 setGeneratedImage(res.imageUrl);
             })
             .catch(() => {
-                if (!ignore) setError(true);
+                setError(true);
             })
             .finally(() => {
-                if (!ignore) setIsGenerating(false);
+                setIsGenerating(false);
             });
-
-        return () => {
-            ignore = true;
-        };
     }, [generatedImage, stems, wrap, ribbon, setGeneratedImage]);
 
     function retry() {
