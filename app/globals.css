@@ -231,3 +231,28 @@
         transform: none;
     }
 }
+
+@keyframes bouquet-bloom {
+    0% {
+        transform: scale(0.6) rotate(-8deg);
+        opacity: 0.4;
+    }
+    50% {
+        transform: scale(1.05) rotate(6deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.6) rotate(-8deg);
+        opacity: 0.4;
+    }
+}
+
+.animate-bouquet-bloom {
+    animation: bouquet-bloom 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-bouquet-bloom {
+        animation: none;
+    }
+}
