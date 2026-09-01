@@ -41,16 +41,30 @@ const CATEGORIES = [
 ];
 
 const STEMS = [
-    { name: "Red Rose", color: "red" },
-    { name: "Pink Rose", color: "pink" },
-    { name: "White Lily", color: "white" },
-    { name: "Yellow Tulip", color: "yellow" },
-    { name: "Purple Orchid", color: "purple" },
-    { name: "Sunflower", color: "yellow" },
-    { name: "Baby's Breath", color: "white" },
-    { name: "Peony", color: "pink" },
-    { name: "Lavender", color: "purple" },
-    { name: "Carnation", color: "red" },
+    { name: "Red Rose", color: "red", pricePerStem: 25000 },
+    { name: "Pink Rose", color: "pink", pricePerStem: 22000 },
+    { name: "White Lily", color: "white", pricePerStem: 30000 },
+    { name: "Yellow Tulip", color: "yellow", pricePerStem: 18000 },
+    { name: "Purple Orchid", color: "purple", pricePerStem: 45000 },
+    { name: "Sunflower", color: "yellow", pricePerStem: 15000 },
+    { name: "Baby's Breath", color: "white", pricePerStem: 12000 },
+    { name: "Peony", color: "pink", pricePerStem: 40000 },
+    { name: "Lavender", color: "purple", pricePerStem: 20000 },
+    { name: "Carnation", color: "red", pricePerStem: 14000 },
+];
+
+const WRAP_PAPERS = [
+    { name: "Kraft Brown", color: "#8B5E3C", price: 20000 },
+    { name: "Korean Matte White", color: "#F4F1EC", price: 35000 },
+    { name: "Pastel Pink Tissue", color: "#F7C9D6", price: 25000 },
+    { name: "Clear Cellophane", color: "#D9E4E1", price: 15000 },
+];
+
+const RIBBONS = [
+    { name: "Satin Blush", color: "#E8A0B4", price: 10000 },
+    { name: "Grosgrain Ivory", color: "#EFE7D6", price: 8000 },
+    { name: "Velvet Burgundy", color: "#6E1E2C", price: 15000 },
+    { name: "Twine Rustic", color: "#B79B6E", price: 5000 },
 ];
 
 const ADJECTIVES = [
@@ -101,6 +115,8 @@ async function main() {
         prisma.productStem.deleteMany(),
         prisma.product.deleteMany(),
         prisma.stem.deleteMany(),
+        prisma.ribbon.deleteMany(),
+        prisma.wrapPaper.deleteMany(),
         prisma.category.deleteMany(),
     ]);
 
@@ -119,6 +135,9 @@ async function main() {
             }),
         ),
     );
+
+    await prisma.wrapPaper.createMany({ data: WRAP_PAPERS });
+    await prisma.ribbon.createMany({ data: RIBBONS });
 
     let made = 0;
     let productStemRows = 0;
@@ -161,7 +180,9 @@ async function main() {
     }
 
     console.log(
-        `Seeded ${categories.length} categories, ${stems.length} stems, ${made} products (${productStemRows} product-stem rows).`,
+        `Seeded ${categories.length} categories, ${stems.length} stems, ` +
+            `${WRAP_PAPERS.length} wrap papers, ${RIBBONS.length} ribbons, ` +
+            `${made} products (${productStemRows} product-stem rows).`,
     );
 }
 
