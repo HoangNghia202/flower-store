@@ -8,25 +8,36 @@ export interface SelectedStem {
     color: string;
 }
 
+export interface SelectedOption {
+    id: string;
+    name: string;
+    color: string;
+    price: number;
+}
+
+const LAST_STEP = 4;
+
 interface CustomBouquetState {
     step: number;
     selectedStems: SelectedStem[];
-    selectedWrap: string | null;
-    selectedRibbon: string | null;
+    selectedWrap: SelectedOption | null;
+    selectedRibbon: SelectedOption | null;
+    generatedImage: string | null;
+
     nextStep: () => void;
     prevStep: () => void;
     setStep: (step: number) => void;
-    addStem: (stem: {
-        id: string;
-        name: string;
-        pricePerStem: number;
-        color: string;
-    }) => void;
+
+    addStem: (stem: Omit<SelectedStem, "quantity">) => void;
     removeStem: (stemId: string) => void;
     updateStemQuantity: (stemId: string, quantity: number) => void;
-    setWrap: (wrap: string) => void;
-    setRibbon: (ribbon: string) => void;
+
+    setWrap: (wrap: SelectedOption) => void;
+    setRibbon: (ribbon: SelectedOption) => void;
+    setGeneratedImage: (url: string | null) => void;
+
     resetBuilder: () => void;
+
     getBuilderTotalPrice: () => number;
     getBuilderTotalStems: () => number;
 }
@@ -36,10 +47,13 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
     selectedStems: [],
     selectedWrap: null,
     selectedRibbon: null,
+    generatedImage: null,
 
-    nextStep: () => set((state) => ({ step: state.step + 1 })),
+    nextStep: () =>
+        set((state) => ({ step: Math.min(LAST_STEP, state.step + 1) })),
     prevStep: () => set((state) => ({ step: Math.max(1, state.step - 1) })),
-    setStep: (step) => set({ step }),
+    setStep: (step) =>
+        set({ step: Math.min(LAST_STEP, Math.max(1, step)) }),
 
     addStem: (stem) => {
         const current = get().selectedStems;
@@ -51,9 +65,7 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
                 ),
             });
         } else {
-            set({
-                selectedStems: [...current, { ...stem, quantity: 1 }],
-            });
+            set({ selectedStems: [...current, { ...stem, quantity: 1 }] });
         }
     },
 
@@ -77,6 +89,7 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
 
     setWrap: (wrap) => set({ selectedWrap: wrap }),
     setRibbon: (ribbon) => set({ selectedRibbon: ribbon }),
+    setGeneratedImage: (url) => set({ generatedImage: url }),
 
     resetBuilder: () =>
         set({
@@ -84,6 +97,7 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
             selectedStems: [],
             selectedWrap: null,
             selectedRibbon: null,
+            generatedImage: null,
         }),
 
     getBuilderTotalPrice: () => {
@@ -91,9 +105,9 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
             (total, stem) => total + stem.pricePerStem * stem.quantity,
             0,
         );
-        // Base cost for paper wrapping & ribbon (e.g., 50,000 VND base fee)
-        const baseFee = get().selectedWrap || get().selectedRibbon ? 50000 : 0;
-        return stemsPrice + baseFee;
+        const wrapPrice = get().selectedWrap?.price ?? 0;
+        const ribbonPrice = get().selectedRibbon?.price ?? 0;
+        return stemsPrice + wrapPrice + ribbonPrice;
     },
 
     getBuilderTotalStems: () => {
