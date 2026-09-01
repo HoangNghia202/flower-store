@@ -61,15 +61,16 @@ model Product {
 
 // 3.5. Cành hoa raw trong kho đông lạnh (Quản lý stem-level inventory)
 model Stem {
-    id          String              @id @default(cuid())
-    name        String              @unique // Tên cành hoa, vd: Red Rose, Yellow Tulip, Lily
-    color       String // Màu chủ đạo để filter
-    stock       Int                 @default(0) // Số lượng cành hiện có trong tủ bảo quản
-    criticalMin Int                 @default(10) // Ngưỡng cảnh báo sắp hết hoa
-    createdAt   DateTime            @default(now())
-    updatedAt   DateTime            @updatedAt
-    products    ProductStem[]
-    customItems CustomBouquetStem[]
+    id           String              @id @default(cuid())
+    name         String              @unique // Tên cành hoa, vd: Red Rose, Yellow Tulip, Lily
+    color        String // Màu chủ đạo để filter
+    stock        Int                 @default(0) // Số lượng cành hiện có trong tủ bảo quản
+    criticalMin  Int                 @default(10) // Ngưỡng cảnh báo sắp hết hoa
+    pricePerStem Float               @default(0) // VND per single stem
+    createdAt    DateTime            @default(now())
+    updatedAt    DateTime            @updatedAt
+    products     ProductStem[]
+    customItems  CustomBouquetStem[]
 }
 
 // Bảng liên kết công thức cắm hoa
@@ -152,6 +153,26 @@ model CustomBouquetStem {
     stemId          String
     stem            Stem          @relation(fields: [stemId], references: [id])
     quantity        Int // Số lượng cành khách chọn cho loại hoa này
+}
+
+// Giấy gói cho bó hoa tự thiết kế (lookup data cho builder)
+model WrapPaper {
+    id        String   @id @default(cuid())
+    name      String   @unique
+    color     String // Mã màu hex hiển thị swatch trong builder
+    price     Float // Phụ phí cộng vào tổng bó (VND)
+    active    Boolean  @default(true)
+    createdAt DateTime @default(now())
+}
+
+// Ruy băng cho bó hoa tự thiết kế
+model Ribbon {
+    id        String   @id @default(cuid())
+    name      String   @unique
+    color     String
+    price     Float
+    active    Boolean  @default(true)
+    createdAt DateTime @default(now())
 }
 
 // 7. Sổ địa chỉ (Lưu danh sách người nhận quà hay tặng)
