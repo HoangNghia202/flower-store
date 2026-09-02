@@ -2,12 +2,17 @@
 
 import { Check } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import { BUILDER_STEPS } from "@/shared/lib/constants/custom-bouquet.const";
 
-export function BuilderStepper({ current }: { current: number }) {
+export function BuilderStepper({
+    steps,
+    current,
+}: {
+    steps: string[];
+    current: number;
+}) {
     return (
         <ol className="mb-8 flex items-center gap-2">
-            {BUILDER_STEPS.map((label, i) => {
+            {steps.map((label, i) => {
                 const stepNo = i + 1;
                 const done = stepNo < current;
                 const active = stepNo === current;
@@ -33,18 +38,16 @@ export function BuilderStepper({ current }: { current: number }) {
                         >
                             {label}
                         </span>
-                        {stepNo < BUILDER_STEPS.length && (
+                        {stepNo < steps.length && (
                             <div className="relative mx-1 h-0.5 flex-1 bg-gray-100">
                                 <div
                                     className="absolute inset-y-0 left-0 bg-pink-500 transition-[width] duration-500"
-                                    style={{
-                                        width: done ? "100%" : "0%",
-                                    }}
+                                    style={{ width: done ? "100%" : "0%" }}
                                 />
                             </div>
                         )}
                     </li>
-                    );
+                );
             })}
         </ol>
     );
