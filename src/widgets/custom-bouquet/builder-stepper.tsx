@@ -44,7 +44,7 @@ export function BuilderStepper({ current }: { current: number }) {
                             </div>
                         )}
                     </li>
-                );
+                    );
             })}
         </ol>
     );
