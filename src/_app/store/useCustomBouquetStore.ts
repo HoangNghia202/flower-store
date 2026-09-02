@@ -38,7 +38,7 @@ interface CustomBouquetState {
     selectedRibbon: SelectedOption | null;
     generatedImage: string | null;
 
-    referenceImages: string[];
+    referenceFiles: File[];
     floristNote: string;
 
     cardMessage: string;
@@ -60,8 +60,8 @@ interface CustomBouquetState {
     setRibbon: (opt: SelectedOption) => void;
     setGeneratedImage: (url: string | null) => void;
 
-    addReferenceImage: (url: string) => void;
-    removeReferenceImage: (url: string) => void;
+    addReferenceFile: (file: File) => void;
+    removeReferenceFile: (file: File) => void;
     setFloristNote: (text: string) => void;
 
     setCardMessage: (text: string) => void;
@@ -83,7 +83,7 @@ const WIZARD_DEFAULTS = {
     selectedWrap: null,
     selectedRibbon: null,
     generatedImage: null,
-    referenceImages: [] as string[],
+    referenceFiles: [] as File[],
     floristNote: "",
     cardMessage: "",
 };
@@ -188,16 +188,21 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
     setRibbon: (opt) => set({ selectedRibbon: opt, generatedImage: null }),
     setGeneratedImage: (url) => set({ generatedImage: url }),
 
-    addReferenceImage: (url) => {
-        const current = get().referenceImages;
-        if (current.length >= MAX_REFERENCE_IMAGES || current.includes(url)) {
-            return;
-        }
-        set({ referenceImages: [...current, url] });
+    addReferenceFile: (file) => {
+        const current = get().referenceFiles;
+        if (current.length >= MAX_REFERENCE_IMAGES) return;
+        const duplicate = current.some(
+            (f) =>
+                f.name === file.name &&
+                f.size === file.size &&
+                f.lastModified === file.lastModified,
+        );
+        if (duplicate) return;
+        set({ referenceFiles: [...current, file] });
     },
-    removeReferenceImage: (url) =>
+    removeReferenceFile: (file) =>
         set({
-            referenceImages: get().referenceImages.filter((u) => u !== url),
+            referenceFiles: get().referenceFiles.filter((f) => f !== file),
         }),
     setFloristNote: (text) => set({ floristNote: text }),
 
@@ -211,7 +216,7 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
         if (s.mode === "photo") {
             switch (step) {
                 case 1:
-                    return s.referenceImages.length >= 1;
+                    return s.referenceFiles.length >= 1;
                 case 2:
                     return s.occasion !== null;
                 case 3:

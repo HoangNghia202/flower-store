@@ -15,7 +15,7 @@ const REVIEW_STEP = 5;
 
 export function PhotoWizardWidget() {
     // Whole-store subscribe: the Next button's disabled state depends on
-    // referenceImages / occasion / tier via `canProceed(step)`, so the
+    // referenceFiles / occasion / tier via `canProceed(step)`, so the
     // wizard must re-render on any of those. (Same pattern as BuildWizard.)
     const s = useCustomBouquetStore();
     const { step } = s;

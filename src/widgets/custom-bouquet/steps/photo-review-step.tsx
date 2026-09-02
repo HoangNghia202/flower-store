@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/shared/ui";
 import { useCustomBouquetStore } from "@/_app/store/useCustomBouquetStore";
 import { useCartStore } from "@/_app/store/useCartStore";
 import { OCCASIONS } from "@/shared/lib/constants/custom-bouquet.const";
+import { uploadImageToCloudinary } from "@/shared/lib/cloudinary";
 import { CardMessageDialog, useCardMessageGate } from "../card-message-field";
 
 function vnd(n: number): string {
@@ -16,10 +18,37 @@ export function PhotoReviewStep() {
     const s = useCustomBouquetStore();
     const addToCart = useCartStore((c) => c.addToCart);
 
+    const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+
+    const [previews, setPreviews] = useState<string[]>([]);
+
+    useEffect(() => {
+        const urls = s.referenceFiles.map((f) => URL.createObjectURL(f));
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- object-URL lifecycle sync
+        setPreviews(urls);
+        return () => urls.forEach((u) => URL.revokeObjectURL(u));
+    }, [s.referenceFiles]);
+
     const occasionLabel =
         OCCASIONS.find((o) => o.id === s.occasion)?.label ?? "—";
 
-    function proceed() {
+    async function proceed() {
+        if (uploading) return;
+        setUploadError(null);
+        setUploading(true);
+        let urls: string[];
+        try {
+            urls = await Promise.all(
+                s.referenceFiles.map((f) => uploadImageToCloudinary(f)),
+            );
+        } catch (e) {
+            setUploadError(
+                e instanceof Error ? e.message : "Tải ảnh lên thất bại",
+            );
+            setUploading(false);
+            return;
+        }
         const id = `CUSTOM-${crypto.randomUUID()}`;
         addToCart(
             {
@@ -27,14 +56,14 @@ export function PhotoReviewStep() {
                 name: "Bó hoa đặt theo ảnh",
                 slug: "custom-bouquet",
                 price: s.getTotalPrice(),
-                image: s.referenceImages[0] ?? "",
+                image: urls[0] ?? "",
                 quantity: 1,
                 isCustomBouquet: true,
                 customDetails: {
                     mode: "photo",
                     occasion: s.occasion ?? undefined,
                     tierLabel: s.tier?.label,
-                    referenceImages: s.referenceImages,
+                    referenceImages: urls,
                     floristNote: s.floristNote || undefined,
                     cardMessage: s.cardMessage || undefined,
                 },
@@ -54,11 +83,11 @@ export function PhotoReviewStep() {
             </h2>
 
             <div className="grid grid-cols-3 gap-3">
-                {s.referenceImages.map((url) => (
+                {s.referenceFiles.map((file, i) => (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                        key={url}
-                        src={url}
+                        key={file.name + file.size + i}
+                        src={previews[i]}
                         alt="Ảnh mẫu"
                         className="aspect-square w-full rounded-xl border object-cover"
                     />
@@ -86,9 +115,16 @@ export function PhotoReviewStep() {
                 size="lg"
                 className="mt-4 w-full bg-pink-500 hover:bg-pink-600"
                 onClick={gate.attemptAddToCart}
+                disabled={uploading}
             >
-                Thêm vào giỏ
+                {uploading ? "Đang tải ảnh…" : "Thêm vào giỏ"}
             </Button>
+
+            {uploadError && (
+                <p role="alert" className="mt-2 text-sm text-red-500">
+                    {uploadError}
+                </p>
+            )}
 
             <CardMessageDialog
                 open={gate.dialogOpen}

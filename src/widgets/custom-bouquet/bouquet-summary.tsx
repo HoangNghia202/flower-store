@@ -68,7 +68,7 @@ export function BouquetSummary() {
                 {s.mode === "photo" && (
                     <div className="flex justify-between gap-2">
                         <dt>Ảnh mẫu</dt>
-                        <dd>{s.referenceImages.length} ảnh</dd>
+                        <dd>{s.referenceFiles.length} ảnh</dd>
                     </div>
                 )}
             </dl>

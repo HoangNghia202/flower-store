@@ -1,38 +1,34 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { useCustomBouquetStore } from "@/_app/store/useCustomBouquetStore";
-import { uploadImageToCloudinary } from "@/shared/lib/cloudinary";
 import { MAX_REFERENCE_IMAGES } from "@/shared/lib/constants/custom-bouquet.const";
 
 export function PhotoUploadStep() {
-    const images = useCustomBouquetStore((s) => s.referenceImages);
-    const addImage = useCustomBouquetStore((s) => s.addReferenceImage);
-    const removeImage = useCustomBouquetStore((s) => s.removeReferenceImage);
+    const referenceFiles = useCustomBouquetStore((s) => s.referenceFiles);
+    const addReferenceFile = useCustomBouquetStore((s) => s.addReferenceFile);
+    const removeReferenceFile = useCustomBouquetStore(
+        (s) => s.removeReferenceFile,
+    );
 
     const inputRef = useRef<HTMLInputElement>(null);
-    const [uploading, setUploading] = useState(0);
-    const [error, setError] = useState<string | null>(null);
+    const [previews, setPreviews] = useState<string[]>([]);
 
-    const remaining = MAX_REFERENCE_IMAGES - images.length;
+    useEffect(() => {
+        const urls = referenceFiles.map((f) => URL.createObjectURL(f));
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- object-URL lifecycle sync
+        setPreviews(urls);
+        return () => urls.forEach((u) => URL.revokeObjectURL(u));
+    }, [referenceFiles]);
 
-    async function handleFiles(files: FileList | null) {
+    const remaining = MAX_REFERENCE_IMAGES - referenceFiles.length;
+
+    function handleFiles(files: FileList | null) {
         if (!files) return;
-        setError(null);
         const picked = Array.from(files).slice(0, remaining);
         for (const file of picked) {
-            setUploading((n) => n + 1);
-            try {
-                const url = await uploadImageToCloudinary(file);
-                addImage(url);
-            } catch (e) {
-                setError(
-                    e instanceof Error ? e.message : "Tải ảnh lên thất bại",
-                );
-            } finally {
-                setUploading((n) => n - 1);
-            }
+            addReferenceFile(file);
         }
         if (inputRef.current) inputRef.current.value = "";
     }
@@ -44,7 +40,7 @@ export function PhotoUploadStep() {
                     Tải ảnh mẫu
                 </h2>
                 <span className="text-sm text-gray-400">
-                    {images.length} / {MAX_REFERENCE_IMAGES}
+                    {referenceFiles.length} / {MAX_REFERENCE_IMAGES}
                 </span>
             </div>
 
@@ -56,21 +52,21 @@ export function PhotoUploadStep() {
                     handleFiles(e.dataTransfer.files);
                 }}
             >
-                {images.map((url) => (
+                {referenceFiles.map((file, i) => (
                     <div
-                        key={url}
+                        key={file.name + file.size + i}
                         className="relative aspect-square overflow-hidden rounded-xl border"
                     >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                            src={url}
+                            src={previews[i]}
                             alt="Ảnh mẫu"
                             className="h-full w-full object-cover"
                         />
                         <button
                             type="button"
                             aria-label="Xoá ảnh"
-                            onClick={() => removeImage(url)}
+                            onClick={() => removeReferenceFile(file)}
                             className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white"
                         >
                             <X size={14} />
@@ -82,10 +78,9 @@ export function PhotoUploadStep() {
                     <button
                         type="button"
                         onClick={() => inputRef.current?.click()}
-                        disabled={uploading > 0}
-                        className="flex aspect-square items-center justify-center rounded-xl border border-dashed border-gray-300 text-sm text-gray-500 hover:border-pink-300 disabled:opacity-50"
+                        className="flex aspect-square items-center justify-center rounded-xl border border-dashed border-gray-300 text-sm text-gray-500 hover:border-pink-300"
                     >
-                        {uploading > 0 ? "Đang tải…" : "+ Thêm ảnh"}
+                        + Thêm ảnh
                     </button>
                 )}
             </div>
@@ -99,11 +94,6 @@ export function PhotoUploadStep() {
                 onChange={(e) => handleFiles(e.target.files)}
             />
 
-            {error && (
-                <p role="alert" className="mt-2 text-sm text-red-500">
-                    {error}
-                </p>
-            )}
             <p className="mt-2 text-xs text-gray-400">
                 Tải lên 1–{MAX_REFERENCE_IMAGES} ảnh bó hoa bạn muốn florist
                 phỏng theo.
