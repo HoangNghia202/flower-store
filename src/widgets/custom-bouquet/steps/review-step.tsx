@@ -9,57 +9,68 @@ import {
     generateBouquetImage,
     type BouquetSelection,
 } from "@/src/features/generate-bouquet-image";
-import { stemEmoji } from "@/shared/lib/constants/custom-bouquet.const";
+import {
+    OCCASIONS,
+    FLOWER_COLORS,
+    BOUQUET_STYLES,
+} from "@/shared/lib/constants/custom-bouquet.const";
+import {
+    CardMessageField,
+    CardMessageDialog,
+    useCardMessageGate,
+} from "../card-message-field";
 
 function vnd(n: number): string {
     return n.toLocaleString("vi-VN") + "₫";
 }
 
+const occasionLabel = (id: string | null) =>
+    OCCASIONS.find((o) => o.id === id)?.label ?? "—";
+const styleLabel = (id: string | null) =>
+    BOUQUET_STYLES.find((s) => s.id === id)?.label ?? null;
+const colorLabels = (ids: string[]) =>
+    ids
+        .map((id) => FLOWER_COLORS.find((c) => c.id === id)?.label ?? id)
+        .join(", ");
+
 export function ReviewStep() {
     const router = useRouter();
-
-    const stems = useCustomBouquetStore((s) => s.selectedStems);
-    const wrap = useCustomBouquetStore((s) => s.selectedWrap);
-    const ribbon = useCustomBouquetStore((s) => s.selectedRibbon);
-    const generatedImage = useCustomBouquetStore((s) => s.generatedImage);
-    const setGeneratedImage = useCustomBouquetStore((s) => s.setGeneratedImage);
-    const totalPrice = useCustomBouquetStore((s) => s.getBuilderTotalPrice());
-    const resetBuilder = useCustomBouquetStore((s) => s.resetBuilder);
-
-    const addToCart = useCartStore((s) => s.addToCart);
+    const s = useCustomBouquetStore();
+    const addToCart = useCartStore((c) => c.addToCart);
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState(false);
     const [attempt, setAttempt] = useState(0);
     const startedRef = useRef(false);
 
+    const selection: BouquetSelection = {
+        occasion: s.occasion,
+        colors: s.colors,
+        style: s.style,
+        flowers: s.selectedFlowers.map((f) => ({
+            name: f.name,
+            color: f.color,
+        })),
+        arrangementNote: s.arrangementNote,
+        wrapPaper: s.selectedWrap
+            ? { name: s.selectedWrap.name, color: s.selectedWrap.color }
+            : null,
+        ribbon: s.selectedRibbon
+            ? { name: s.selectedRibbon.name, color: s.selectedRibbon.color }
+            : null,
+    };
+
     useEffect(() => {
-        if (generatedImage || startedRef.current) return;
+        if (s.generatedImage || startedRef.current) return;
         startedRef.current = true;
-
-        const selection: BouquetSelection = {
-            stems: stems.map((s) => ({
-                name: s.name,
-                color: s.color,
-                quantity: s.quantity,
-            })),
-            wrapPaper: wrap ? { name: wrap.name, color: wrap.color } : null,
-            ribbon: ribbon ? { name: ribbon.name, color: ribbon.color } : null,
-        };
-
         setIsGenerating(true);
         setError(false);
         generateBouquetImage(selection)
-            .then((res) => {
-                setGeneratedImage(res.imageUrl);
-            })
-            .catch(() => {
-                setError(true);
-            })
-            .finally(() => {
-                setIsGenerating(false);
-            });
-    }, [generatedImage, stems, wrap, ribbon, setGeneratedImage, attempt]);
+            .then((res) => s.setGeneratedImage(res.imageUrl))
+            .catch(() => setError(true))
+            .finally(() => setIsGenerating(false));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [s.generatedImage, attempt]);
 
     function retry() {
         startedRef.current = false;
@@ -67,39 +78,45 @@ export function ReviewStep() {
         setAttempt((n) => n + 1);
     }
 
-    function addToCartAndCheckout() {
+    function proceed() {
         const id = `CUSTOM-${crypto.randomUUID()}`;
         addToCart(
             {
                 id,
-                name: "Custom Bouquet",
+                name: "Bó hoa tự thiết kế",
                 slug: "custom-bouquet",
-                price: totalPrice,
-                image: generatedImage ?? "",
+                price: s.getTotalPrice(),
+                image: s.generatedImage ?? "",
                 quantity: 1,
                 isCustomBouquet: true,
                 customDetails: {
-                    wrapPaper: wrap?.name ?? "",
-                    ribbon: ribbon?.name ?? "",
-                    stems: stems.map((s) => ({
-                        stemId: s.id,
-                        name: s.name,
-                        pricePerStem: s.pricePerStem,
-                        quantity: s.quantity,
-                        color: s.color,
+                    mode: "build",
+                    occasion: s.occasion ?? undefined,
+                    tierLabel: s.tier?.label,
+                    colors: s.colors,
+                    style: s.style ?? undefined,
+                    flowers: s.selectedFlowers.map((f) => ({
+                        name: f.name,
+                        color: f.color,
                     })),
+                    arrangementNote: s.arrangementNote || undefined,
+                    wrapPaper: s.selectedWrap?.name,
+                    ribbon: s.selectedRibbon?.name,
+                    cardMessage: s.cardMessage || undefined,
                 },
             },
             1,
         );
         router.push("/cart");
-        resetBuilder();
+        s.resetBuilder();
     }
+
+    const gate = useCardMessageGate(proceed);
 
     return (
         <div>
             <h2 className="mb-4 font-playfair text-xl font-bold text-gray-900">
-                Review your bouquet
+                Xem lại
             </h2>
 
             <div className="grid gap-6 sm:grid-cols-2">
@@ -113,61 +130,80 @@ export function ReviewStep() {
                                 💐
                             </span>
                             <p className="text-sm text-gray-500">
-                                Arranging your bouquet…
+                                Đang dựng bó hoa…
                             </p>
                         </div>
                     )}
-
                     {!isGenerating && error && (
                         <div className="flex flex-col items-center gap-3 text-center">
                             <p className="text-sm text-gray-500">
-                                Couldn&apos;t generate the preview.
+                                Không tạo được ảnh xem trước.
                             </p>
                             <Button type="button" size="sm" onClick={retry}>
-                                Try again
+                                Thử lại
                             </Button>
                         </div>
                     )}
-
-                    {!isGenerating && !error && generatedImage && (
+                    {!isGenerating && !error && s.generatedImage && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                            src={generatedImage}
-                            alt="Your custom bouquet preview"
+                            src={s.generatedImage}
+                            alt="Ảnh xem trước bó hoa"
                             className="h-full w-full object-cover"
                         />
                     )}
                 </div>
 
-                <div>
-                    <ul className="space-y-1 text-sm text-gray-600">
-                        {stems.map((s) => (
-                            <li key={s.id}>
-                                {stemEmoji(s.name)} {s.quantity}× {s.name}
-                            </li>
-                        ))}
-                    </ul>
-                    <p className="mt-3 text-sm text-gray-600">
-                        Wrap: {wrap?.name ?? "—"}
+                <div className="space-y-1 text-sm text-gray-600">
+                    {s.quick && (
+                        <p className="text-gray-500">
+                            Florist sẽ chọn hoa, kiểu dáng và cách gói phù hợp.
+                        </p>
+                    )}
+                    <p>Dịp: {occasionLabel(s.occasion)}</p>
+                    <p>Ngân sách: {s.tier?.label ?? "—"}</p>
+                    <p>Màu: {colorLabels(s.colors) || "—"}</p>
+                    {styleLabel(s.style) && <p>Kiểu: {styleLabel(s.style)}</p>}
+                    {s.selectedFlowers.length > 0 && (
+                        <p>
+                            Hoa:{" "}
+                            {s.selectedFlowers.map((f) => f.name).join(", ")}
+                        </p>
+                    )}
+                    {s.arrangementNote.trim() && (
+                        <p>Sắp xếp: {s.arrangementNote}</p>
+                    )}
+                    {s.selectedWrap && <p>Giấy gói: {s.selectedWrap.name}</p>}
+                    {s.selectedRibbon && (
+                        <p>Ruy băng: {s.selectedRibbon.name}</p>
+                    )}
+
+                    <p className="pt-3 text-2xl font-bold text-gray-900">
+                        {vnd(s.getTotalPrice())}
                     </p>
-                    <p className="text-sm text-gray-600">
-                        Ribbon: {ribbon?.name ?? "—"}
-                    </p>
-                    <p className="mt-4 text-2xl font-bold text-gray-900">
-                        {vnd(totalPrice)}
-                    </p>
+
+                    <div className="pt-3">
+                        <CardMessageField />
+                    </div>
 
                     <Button
                         type="button"
                         size="lg"
                         className="mt-4 w-full bg-pink-500 hover:bg-pink-600"
-                        disabled={isGenerating || !generatedImage}
-                        onClick={addToCartAndCheckout}
+                        disabled={isGenerating || !s.generatedImage}
+                        onClick={gate.attemptAddToCart}
                     >
-                        Add to cart &amp; checkout
+                        Thêm vào giỏ
                     </Button>
                 </div>
             </div>
+
+            <CardMessageDialog
+                open={gate.dialogOpen}
+                onOpenChange={gate.setDialogOpen}
+                onWriteMessage={gate.onWriteMessage}
+                onContinue={gate.onContinue}
+            />
         </div>
     );
 }
