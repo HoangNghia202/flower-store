@@ -16,11 +16,11 @@ export async function CustomBouquetPage() {
         <div className="py-8">
             <header className="mb-8 text-center">
                 <h1 className="font-playfair text-3xl font-bold text-gray-900">
-                    Design Your Own Bouquet
+                    Đặt bó hoa của riêng bạn
                 </h1>
                 <p className="mt-2 text-gray-500">
-                    Choose your stems, wrap, and ribbon — we&apos;ll show you a
-                    preview.
+                    Tự thiết kế từng chi tiết, hoặc gửi ảnh mẫu để florist làm
+                    theo.
                 </p>
             </header>
             <BouquetBuilderWidget
