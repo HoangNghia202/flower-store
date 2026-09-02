@@ -18,9 +18,21 @@ export interface CartItem {
     quantity: number;
     isCustomBouquet?: boolean;
     customDetails?: {
-        wrapPaper: string;
-        ribbon: string;
-        stems: CartStem[];
+        // v1 (now optional)
+        wrapPaper?: string;
+        ribbon?: string;
+        stems?: CartStem[];
+        // v2
+        mode?: "build" | "photo";
+        occasion?: string;
+        tierLabel?: string;
+        colors?: string[];
+        style?: string;
+        flowers?: { name: string; color: string }[];
+        arrangementNote?: string;
+        referenceImages?: string[];
+        floristNote?: string;
+        cardMessage?: string;
     };
     addons?: {
         id: string;

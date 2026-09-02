@@ -16,12 +16,17 @@ export function CartLineItem({ item }: { item: CartItem }) {
     );
     const lineTotal = (item.price + addonsTotal) * item.quantity;
     const hasImage = Boolean(item.image) && item.image !== PLACEHOLDER_IMAGE;
-    const isCustom = Boolean(item.isCustomBouquet && item.customDetails);
+
+    const cd = item.customDetails;
+    const isV2Build = cd?.mode === "build";
+    const isV2Photo = cd?.mode === "photo";
+    const isV1Custom = !cd?.mode && Boolean(item.isCustomBouquet && cd?.stems);
+    const isAnyCustom = isV2Build || isV2Photo || isV1Custom;
 
     return (
         <div className="flex gap-4 py-4">
             <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-pink-100 to-violet-100">
-                {isCustom && item.image ? (
+                {isAnyCustom && item.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                         src={item.image}
@@ -45,7 +50,7 @@ export function CartLineItem({ item }: { item: CartItem }) {
 
             <div className="flex flex-1 flex-col">
                 <div className="flex items-start justify-between gap-2">
-                    {isCustom ? (
+                    {isAnyCustom ? (
                         <span className="line-clamp-2 font-medium text-gray-800">
                             {item.name}
                         </span>
@@ -71,15 +76,41 @@ export function CartLineItem({ item }: { item: CartItem }) {
                     {item.price.toLocaleString("vi-VN")}₫
                 </p>
 
-                {isCustom && (
+                {isV2Build && cd && (
                     <ul className="mt-1 space-y-0.5 text-xs text-gray-400">
-                        <li>Wrap: {item.customDetails!.wrapPaper || "—"}</li>
-                        <li>Ribbon: {item.customDetails!.ribbon || "—"}</li>
+                        {cd.occasion && <li>Dịp: {cd.occasion}</li>}
+                        {cd.tierLabel && <li>Ngân sách: {cd.tierLabel}</li>}
+                        {cd.colors?.length ? (
+                            <li>Màu: {cd.colors.join(", ")}</li>
+                        ) : null}
+                        {cd.style && <li>Kiểu: {cd.style}</li>}
+                        {cd.flowers?.length ? (
+                            <li>{cd.flowers.map((f) => f.name).join(" · ")}</li>
+                        ) : null}
+                        {cd.arrangementNote && (
+                            <li>Sắp xếp: {cd.arrangementNote}</li>
+                        )}
+                        {cd.wrapPaper && <li>Giấy gói: {cd.wrapPaper}</li>}
+                        {cd.ribbon && <li>Ruy băng: {cd.ribbon}</li>}
+                        {cd.cardMessage && <li>Lời nhắn: {cd.cardMessage}</li>}
+                    </ul>
+                )}
+                {isV2Photo && cd && (
+                    <ul className="mt-1 space-y-0.5 text-xs text-gray-400">
+                        {cd.occasion && <li>Dịp: {cd.occasion}</li>}
+                        {cd.tierLabel && <li>Ngân sách: {cd.tierLabel}</li>}
+                        <li>{cd.referenceImages?.length ?? 0} ảnh mẫu</li>
+                        {cd.floristNote && <li>Ghi chú: {cd.floristNote}</li>}
+                        {cd.cardMessage && <li>Lời nhắn: {cd.cardMessage}</li>}
+                    </ul>
+                )}
+                {isV1Custom && cd?.stems && (
+                    <ul className="mt-1 space-y-0.5 text-xs text-gray-400">
+                        <li>Wrap: {cd.wrapPaper || "—"}</li>
+                        <li>Ribbon: {cd.ribbon || "—"}</li>
                         <li>
-                            {item
-                                .customDetails!.stems.map(
-                                    (s) => `${s.quantity}× ${s.name}`,
-                                )
+                            {cd.stems
+                                .map((s) => `${s.quantity}× ${s.name}`)
                                 .join(" · ")}
                         </li>
                     </ul>
