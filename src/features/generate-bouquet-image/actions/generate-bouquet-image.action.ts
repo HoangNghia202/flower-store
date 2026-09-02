@@ -4,6 +4,7 @@ import {
     buildBouquetPrompt,
     type BouquetSelection,
 } from "@/src/features/generate-bouquet-image/model/build-prompt";
+import { FLOWER_COLORS } from "@/shared/lib/constants/custom-bouquet.const";
 
 export interface GenerateBouquetImageResult {
     imageUrl: string;
@@ -21,7 +22,9 @@ function svgBouquet(sel: BouquetSelection): string {
         sel.flowers.length > 0
             ? sel.flowers.map((f) => f.color)
             : sel.colors.length > 0
-              ? sel.colors
+              ? sel.colors.map(
+                    (x) => FLOWER_COLORS.find((c) => c.id === x)?.swatch ?? x,
+                )
               : ["#F7C9D6"];
 
     const cx = CANVAS / 2;
@@ -50,7 +53,12 @@ function svgBouquet(sel: BouquetSelection): string {
 export async function generateBouquetImage(
     sel: BouquetSelection,
 ): Promise<GenerateBouquetImageResult> {
-    if (!sel || !Array.isArray(sel.colors)) {
+    if (
+        !sel ||
+        !Array.isArray(sel.colors) ||
+        !Array.isArray(sel.flowers) ||
+        typeof sel.arrangementNote !== "string"
+    ) {
         throw new Error("Invalid bouquet selection");
     }
 

@@ -43,6 +43,12 @@ export const BOUQUET_STYLES = [
     { id: "basket", label: "Lẵng / Kệ", hidesWrapping: true },
 ] as const;
 
+export function styleHidesWrapping(styleId: string | null): boolean {
+    return !!BOUQUET_STYLES.find(
+        (s) => s.id === styleId && "hidesWrapping" in s,
+    );
+}
+
 export const BUILD_STEPS = [
     "Dịp",
     "Ngân sách",

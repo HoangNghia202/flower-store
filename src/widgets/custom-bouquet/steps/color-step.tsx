@@ -31,6 +31,7 @@ export function ColorStep() {
                         <button
                             key={c.id}
                             type="button"
+                            aria-pressed={active}
                             onClick={() => toggleColor(c.id)}
                             className={cn(
                                 "flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all",

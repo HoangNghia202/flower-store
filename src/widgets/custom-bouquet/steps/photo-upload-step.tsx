@@ -48,7 +48,14 @@ export function PhotoUploadStep() {
                 </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div
+                className="grid grid-cols-3 gap-3"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                    e.preventDefault();
+                    handleFiles(e.dataTransfer.files);
+                }}
+            >
                 {images.map((url) => (
                     <div
                         key={url}
@@ -92,7 +99,11 @@ export function PhotoUploadStep() {
                 onChange={(e) => handleFiles(e.target.files)}
             />
 
-            {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+            {error && (
+                <p role="alert" className="mt-2 text-sm text-red-500">
+                    {error}
+                </p>
+            )}
             <p className="mt-2 text-xs text-gray-400">
                 Tải lên 1–{MAX_REFERENCE_IMAGES} ảnh bó hoa bạn muốn florist
                 phỏng theo.

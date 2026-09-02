@@ -1,3 +1,9 @@
+import {
+    OCCASIONS,
+    FLOWER_COLORS,
+    BOUQUET_STYLES,
+} from "@/shared/lib/constants/custom-bouquet.const";
+
 export interface BouquetSelection {
     occasion: string | null;
     colors: string[];
@@ -8,7 +14,7 @@ export interface BouquetSelection {
     ribbon: { name: string; color: string } | null;
 }
 
-const OCCASION_EN: Record<string, string> = {
+const OCCASION_EN: Record<(typeof OCCASIONS)[number]["id"], string> = {
     birthday: "birthday",
     love: "anniversary",
     "grand-opening": "grand opening",
@@ -18,7 +24,7 @@ const OCCASION_EN: Record<string, string> = {
     sorry: "apology",
 };
 
-const COLOR_EN: Record<string, string> = {
+const COLOR_EN: Record<(typeof FLOWER_COLORS)[number]["id"], string> = {
     red: "red",
     pink: "pink",
     white: "white",
@@ -26,12 +32,12 @@ const COLOR_EN: Record<string, string> = {
     purple: "purple",
 };
 
-const STYLE_EN: Record<string, string> = {
+const STYLE_EN: Record<(typeof BOUQUET_STYLES)[number]["id"], string> = {
     round: "hand-tied",
     korean: "long Korean-style",
     rustic: "loose rustic",
     minimal: "minimalist",
-    basket: "arranged in a basket",
+    basket: "basket",
 };
 
 function joinEn(parts: string[]): string {
@@ -44,13 +50,26 @@ function pluralFlower(name: string): string {
     return n.endsWith("s") ? n : `${n}s`;
 }
 
-export function buildBouquetPrompt(sel: BouquetSelection): string {
-    const occasion = sel.occasion ? OCCASION_EN[sel.occasion] : null;
-    const styleWord = sel.style ? STYLE_EN[sel.style] : null;
-    const colorWords = sel.colors.map((c) => COLOR_EN[c] ?? c);
+function article(nextWord: string) {
+    return /^[aeiou]/i.test(nextWord) ? "an" : "a";
+}
 
+export function buildBouquetPrompt(sel: BouquetSelection): string {
+    const occasion = sel.occasion
+        ? OCCASION_EN[sel.occasion as keyof typeof OCCASION_EN]
+        : null;
+    const isBasket = sel.style === "basket";
+    const styleWord =
+        sel.style && !isBasket
+            ? STYLE_EN[sel.style as keyof typeof STYLE_EN]
+            : null;
+    const colorWords = sel.colors.map(
+        (c) => COLOR_EN[c as keyof typeof COLOR_EN] ?? c,
+    );
+
+    const firstWord = styleWord ?? occasion ?? "bouquet";
     const head =
-        `a ${styleWord ? styleWord + " " : ""}` +
+        `${article(firstWord)} ${styleWord ? styleWord + " " : ""}` +
         `${occasion ? occasion + " " : ""}bouquet`;
 
     const parts: string[] = [head];
@@ -63,6 +82,9 @@ export function buildBouquetPrompt(sel: BouquetSelection): string {
         );
     } else {
         parts.push("a florist's-choice arrangement");
+    }
+    if (isBasket) {
+        parts.push("arranged in a basket");
     }
     const note = sel.arrangementNote.trim();
     parts.push(

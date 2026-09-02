@@ -7,7 +7,7 @@ import { useCustomBouquetStore } from "@/_app/store/useCustomBouquetStore";
 import {
     BUILD_STEPS,
     BUILD_STEPS_QUICK,
-    BOUQUET_STYLES,
+    styleHidesWrapping,
 } from "@/shared/lib/constants/custom-bouquet.const";
 import { BuilderStepper } from "./builder-stepper";
 import { BouquetSummary } from "./bouquet-summary";
@@ -44,9 +44,7 @@ export function BuildWizardWidget({ stems, wraps, ribbons }: Props) {
 
     const onReview = step === REVIEW_STEP;
 
-    const hidesWrapping = !!BOUQUET_STYLES.find(
-        (st) => st.id === s.style && "hidesWrapping" in st,
-    );
+    const hidesWrapping = styleHidesWrapping(s.style);
     // does pressing "next" from the current step land on the review step?
     const nextLandsOnReview =
         step === 6 || (step === 5 && hidesWrapping) || (quick && step === 3);

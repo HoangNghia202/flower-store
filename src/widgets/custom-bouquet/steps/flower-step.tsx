@@ -48,6 +48,7 @@ export function FlowerStep({ stems }: { stems: StemVM[] }) {
                             <button
                                 key={flower.id}
                                 type="button"
+                                aria-pressed={on}
                                 disabled={atCap}
                                 onClick={() =>
                                     toggleFlower({

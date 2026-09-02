@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import {
-    BOUQUET_STYLES,
     MAX_REFERENCE_IMAGES,
+    styleHidesWrapping,
     type BudgetTier,
 } from "@/shared/lib/constants/custom-bouquet.const";
 
@@ -22,12 +22,6 @@ export interface SelectedOption {
 
 const BUILD_REVIEW_STEP = 7;
 const PHOTO_LAST_STEP = 5;
-
-function styleHidesWrapping(styleId: string | null): boolean {
-    return !!BOUQUET_STYLES.find(
-        (s) => s.id === styleId && "hidesWrapping" in s,
-    );
-}
 
 interface CustomBouquetState {
     mode: BouquetMode | null;
@@ -126,7 +120,7 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
             return;
         }
         if (quick && step === BUILD_REVIEW_STEP) {
-            set({ step: 3 });
+            set({ step: 3, quick: false });
             return;
         }
         if (step === BUILD_REVIEW_STEP && styleHidesWrapping(style)) {
@@ -136,13 +130,14 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
         set({ step: Math.max(1, step - 1) });
     },
 
-    setStep: (step) => set({ step: Math.max(1, step) }),
+    setStep: (step) =>
+        set({ step: Math.max(1, Math.min(BUILD_REVIEW_STEP, step)) }),
     setQuick: (quick) =>
         set(
             quick ? { quick: true, step: BUILD_REVIEW_STEP } : { quick: false },
         ),
 
-    setOccasion: (id) => set({ occasion: id }),
+    setOccasion: (id) => set({ occasion: id, generatedImage: null }),
 
     setTier: (tier) => {
         const current = get().selectedFlowers;
@@ -207,7 +202,7 @@ export const useCustomBouquetStore = create<CustomBouquetState>((set, get) => ({
     setFloristNote: (text) => set({ floristNote: text }),
 
     setCardMessage: (text) => set({ cardMessage: text }),
-    resetBuilder: () => set({ mode: null, ...WIZARD_DEFAULTS }),
+    resetBuilder: () => get().resetMode(),
 
     getTotalPrice: () => get().tier?.price ?? 0,
 
