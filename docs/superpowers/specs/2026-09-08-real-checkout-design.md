@@ -412,3 +412,4 @@ Primary verification is a **manual QA script** against the PayOS sandbox:
 - Coupons: subtotal-only, single, non-stackable.
 - PayOS webhook needs a public tunnel in sandbox; the return page is the
   reliable confirmation path for local development.
+- Custom-bouquet line prices are taken from the client cart snapshot (validated only as a finite number > 0); they are not re-derived server-side from Stem/tier data. A crafted snapshot can create a CustomBouquet order row at an arbitrary price. Follow-up: re-price custom lines server-side.
