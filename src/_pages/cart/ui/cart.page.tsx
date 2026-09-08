@@ -1,17 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useHydrated } from "@/shared/hooks";
 import { useCartStore } from "@/_app/store/useCartStore";
-import { CheckoutButton, PaymentSuccessDialog } from "@/src/features/checkout";
 import { CartLineItem } from "./cart-line-item";
 
 export function CartPage() {
     const hydrated = useHydrated();
     const items = useCartStore((s) => s.items);
-    const clearCart = useCartStore((s) => s.clearCart);
-    const [paid, setPaid] = useState(false);
     const subtotal = useCartStore((s) =>
         s.items.reduce((sum, item) => {
             const addons = (item.addons ?? []).reduce(
@@ -22,21 +18,6 @@ export function CartPage() {
         }, 0),
     );
 
-    function handleCheckout() {
-        clearCart();
-        setPaid(true);
-    }
-
-    // Once paid, this must win over every other branch: `clearCart()` empties
-    // `items`, which would otherwise drop us into the empty state and unmount
-    // the dialog before it can show.
-    if (paid) {
-        return <PaymentSuccessDialog />;
-    }
-
-    // Cart state lives in a persisted (localStorage) store, so the server and
-    // first client paint see an empty cart. Wait for hydration before deciding
-    // between the empty state and the item list.
     if (!hydrated) {
         return (
             <div className="py-10">
@@ -96,9 +77,12 @@ export function CartPage() {
                     <p className="mt-2 text-xs text-gray-400">
                         Shipping &amp; taxes calculated at checkout.
                     </p>
-                    <div className="mt-5">
-                        <CheckoutButton onCheckout={handleCheckout} />
-                    </div>
+                    <Link
+                        href="/checkout"
+                        className="mt-5 flex w-full items-center justify-center rounded-md bg-pink-500 px-4 py-3 text-sm font-semibold text-white hover:bg-pink-600"
+                    >
+                        Proceed to checkout
+                    </Link>
                 </aside>
             </div>
         </div>
