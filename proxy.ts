@@ -24,6 +24,17 @@ export async function proxy(request: Request) {
         }
     }
 
+    if (
+        url.pathname.startsWith("/checkout") ||
+        url.pathname.startsWith("/orders")
+    ) {
+        if (!session) {
+            const loginUrl = new URL("/login", request.url);
+            loginUrl.searchParams.set("redirectTo", url.pathname + url.search);
+            return NextResponse.redirect(loginUrl);
+        }
+    }
+
     return NextResponse.next();
 }
 
