@@ -56,6 +56,7 @@ export async function createOrderAction(
     const deliveryDate = new Date(`${form.deliveryDate}T00:00:00`);
     if (!isValidDeliveryDate(deliveryDate, new Date())) {
         return {
+            error: "Please correct the highlighted fields.",
             fieldErrors: {
                 deliveryDate: ["Choose a date from tomorrow onward."],
             },
@@ -180,11 +181,15 @@ export async function createOrderAction(
         ? computeDiscount(discountArgs, subtotal)
         : 0;
     const totals = computeOrderTotals(subtotal, discountAmount);
+    // Round once, then derive the discount from it so that
+    // `totalAmount + discountAmount === subtotal` holds for fractional values.
+    const roundedTotal = Math.round(totals.totalAmount);
+    const roundedDiscount = Math.max(
+        0,
+        Math.round(totals.subtotal) - roundedTotal,
+    );
 
-    if (
-        form.paymentMethod === "PAYOS" &&
-        Math.round(totals.totalAmount) < MIN_PAYOS_AMOUNT
-    ) {
+    if (form.paymentMethod === "PAYOS" && roundedTotal < MIN_PAYOS_AMOUNT) {
         return {
             error: "This order total is too low for online payment. Please choose cash on delivery.",
         };
@@ -206,8 +211,8 @@ export async function createOrderAction(
                     status: "PENDING",
                     paymentStatus: "UNPAID",
                     paymentMethod: form.paymentMethod,
-                    totalAmount: Math.round(totals.totalAmount),
-                    discountAmount: Math.round(totals.discountAmount),
+                    totalAmount: roundedTotal,
+                    discountAmount: roundedDiscount,
                     couponCode: couponCode || null,
                     buyerName: user.name || form.recipientName,
                     buyerPhone: form.recipientPhone,
@@ -280,19 +285,18 @@ export async function createOrderAction(
             });
 
             if (discountArgs) {
-                const fresh = await tx.coupon.findUnique({
-                    where: { code: couponCode },
-                });
-                if (
-                    !fresh ||
-                    (fresh.maxUses != null && fresh.usedCount >= fresh.maxUses)
-                ) {
+                // Atomic guarded increment — avoids a check-then-act race on
+                // `maxUses` and re-checks `active` / `expiresAt` at write time.
+                const updated = await tx.$executeRaw`
+                    UPDATE "Coupon"
+                    SET "usedCount" = "usedCount" + 1
+                    WHERE "code" = ${couponCode}
+                      AND "active" = true
+                      AND ("expiresAt" IS NULL OR "expiresAt" > NOW())
+                      AND ("maxUses" IS NULL OR "usedCount" < "maxUses")`;
+                if (updated !== 1) {
                     throw new Error("COUPON_EXHAUSTED");
                 }
-                await tx.coupon.update({
-                    where: { code: couponCode },
-                    data: { usedCount: { increment: 1 } },
-                });
             }
 
             const finalNumber = formatOrderNumber(order.orderSeq);
@@ -334,19 +338,15 @@ export async function createOrderAction(
         return { ok: true, redirect: `/orders/${orderNumber}?placed=1` };
     }
 
+    let link: Awaited<ReturnType<typeof createPaymentLink>>;
     try {
-        const link = await createPaymentLink({
+        link = await createPaymentLink({
             orderCode: orderSeq,
-            amount: Math.round(totals.totalAmount),
+            amount: roundedTotal,
             description: orderNumber,
             returnUrl: `${APP_URL}/checkout/return`,
             cancelUrl: `${APP_URL}/checkout?payment=cancelled`,
         });
-        await prisma.order.update({
-            where: { orderSeq },
-            data: { paymentSessionId: link.paymentLinkId },
-        });
-        return { ok: true, redirect: link.checkoutUrl, external: true };
     } catch (e) {
         console.error("PayOS link creation failed:", e);
         return {
@@ -354,4 +354,17 @@ export async function createOrderAction(
             redirect: `/orders/${orderNumber}?placed=1&payment=failed`,
         };
     }
+
+    // The link is live from here on — a failed session-id write must not send
+    // the user down the "payment failed" path; the webhook / return page
+    // reconcile payment regardless of `paymentSessionId`.
+    try {
+        await prisma.order.update({
+            where: { orderSeq },
+            data: { paymentSessionId: link.paymentLinkId },
+        });
+    } catch (e) {
+        console.error("PayOS paymentSessionId persist failed:", e);
+    }
+    return { ok: true, redirect: link.checkoutUrl, external: true };
 }

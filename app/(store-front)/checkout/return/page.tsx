@@ -31,6 +31,13 @@ export default async function CheckoutReturnPage({
         });
     }
 
+    // A cancelled return must never clear the cart: skip `placed=1` (which drives
+    // <ClearCartOnMount>). PAID always wins even if `cancel=true` is present.
+    const cancel = Array.isArray(sp["cancel"]) ? sp["cancel"][0] : sp["cancel"];
+    if (status !== "PAID" && cancel === "true") {
+        redirect(`/orders/${order.orderNumber}?payment=cancelled`);
+    }
+
     const suffix =
         status === "PAID" ? "?placed=1" : "?placed=1&payment=pending";
     redirect(`/orders/${order.orderNumber}${suffix}`);
