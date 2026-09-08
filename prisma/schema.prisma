@@ -87,12 +87,15 @@ model ProductStem {
 
 // 4. Đơn hàng (Đặc thù ngành hoa)
 model Order {
-    id          String      @id @default(cuid())
-    orderNumber String      @unique // Mã đơn hàng hiển thị cho khách (VD: FLW-123456)
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
-    status      OrderStatus @default(PENDING)
-    totalAmount Float
+    id             String      @id @default(cuid())
+    orderNumber    String      @unique // Mã đơn hàng hiển thị cho khách (VD: FLW-123456)
+    orderSeq       Int         @unique @default(autoincrement())
+    couponCode     String?
+    discountAmount Float       @default(0)
+    createdAt      DateTime    @default(now())
+    updatedAt      DateTime    @updatedAt
+    status         OrderStatus @default(PENDING)
+    totalAmount    Float
 
     // Thông tin người MUA
     buyerName  String
@@ -132,6 +135,7 @@ model OrderItem {
     order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
     productId String
     product   Product @relation(fields: [productId], references: [id])
+    addons    Json?
 }
 
 // 6. Bó hoa tự thiết kế (Custom Bouquet) do khách tự chọn cành
@@ -139,8 +143,11 @@ model CustomBouquet {
     id        String              @id @default(cuid())
     price     Float // Giá tổng của bó tự chế
     quantity  Int                 @default(1)
-    wrapPaper String // Loại giấy gói chọn
-    ribbon    String // Loại ruy băng chọn
+    wrapPaper String? // Loại giấy gói chọn (null cho bó theo ảnh)
+    ribbon    String? // Loại ruy băng chọn (null cho bó theo ảnh)
+    name      String? // Tên hiển thị chốt tại thời điểm đặt
+    imageUrl  String? // Ảnh preview / ảnh mẫu đầu tiên
+    meta      Json? // Toàn bộ customDetails từ giỏ hàng cho florist
     orderId   String
     order     Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
     stems     CustomBouquetStem[]

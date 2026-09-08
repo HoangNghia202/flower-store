@@ -42,6 +42,8 @@ export type CustomBouquetMinAggregateOutputType = {
   quantity: number | null
   wrapPaper: string | null
   ribbon: string | null
+  name: string | null
+  imageUrl: string | null
   orderId: string | null
 }
 
@@ -51,6 +53,8 @@ export type CustomBouquetMaxAggregateOutputType = {
   quantity: number | null
   wrapPaper: string | null
   ribbon: string | null
+  name: string | null
+  imageUrl: string | null
   orderId: string | null
 }
 
@@ -60,6 +64,9 @@ export type CustomBouquetCountAggregateOutputType = {
   quantity: number
   wrapPaper: number
   ribbon: number
+  name: number
+  imageUrl: number
+  meta: number
   orderId: number
   _all: number
 }
@@ -81,6 +88,8 @@ export type CustomBouquetMinAggregateInputType = {
   quantity?: true
   wrapPaper?: true
   ribbon?: true
+  name?: true
+  imageUrl?: true
   orderId?: true
 }
 
@@ -90,6 +99,8 @@ export type CustomBouquetMaxAggregateInputType = {
   quantity?: true
   wrapPaper?: true
   ribbon?: true
+  name?: true
+  imageUrl?: true
   orderId?: true
 }
 
@@ -99,6 +110,9 @@ export type CustomBouquetCountAggregateInputType = {
   quantity?: true
   wrapPaper?: true
   ribbon?: true
+  name?: true
+  imageUrl?: true
+  meta?: true
   orderId?: true
   _all?: true
 }
@@ -193,8 +207,11 @@ export type CustomBouquetGroupByOutputType = {
   id: string
   price: number
   quantity: number
-  wrapPaper: string
-  ribbon: string
+  wrapPaper: string | null
+  ribbon: string | null
+  name: string | null
+  imageUrl: string | null
+  meta: runtime.JsonValue | null
   orderId: string
   _count: CustomBouquetCountAggregateOutputType | null
   _avg: CustomBouquetAvgAggregateOutputType | null
@@ -225,8 +242,11 @@ export type CustomBouquetWhereInput = {
   id?: Prisma.StringFilter<"CustomBouquet"> | string
   price?: Prisma.FloatFilter<"CustomBouquet"> | number
   quantity?: Prisma.IntFilter<"CustomBouquet"> | number
-  wrapPaper?: Prisma.StringFilter<"CustomBouquet"> | string
-  ribbon?: Prisma.StringFilter<"CustomBouquet"> | string
+  wrapPaper?: Prisma.StringNullableFilter<"CustomBouquet"> | string | null
+  ribbon?: Prisma.StringNullableFilter<"CustomBouquet"> | string | null
+  name?: Prisma.StringNullableFilter<"CustomBouquet"> | string | null
+  imageUrl?: Prisma.StringNullableFilter<"CustomBouquet"> | string | null
+  meta?: Prisma.JsonNullableFilter<"CustomBouquet">
   orderId?: Prisma.StringFilter<"CustomBouquet"> | string
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
   stems?: Prisma.CustomBouquetStemListRelationFilter
@@ -236,8 +256,11 @@ export type CustomBouquetOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
-  wrapPaper?: Prisma.SortOrder
-  ribbon?: Prisma.SortOrder
+  wrapPaper?: Prisma.SortOrderInput | Prisma.SortOrder
+  ribbon?: Prisma.SortOrderInput | Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  meta?: Prisma.SortOrderInput | Prisma.SortOrder
   orderId?: Prisma.SortOrder
   order?: Prisma.OrderOrderByWithRelationInput
   stems?: Prisma.CustomBouquetStemOrderByRelationAggregateInput
@@ -250,8 +273,11 @@ export type CustomBouquetWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.CustomBouquetWhereInput | Prisma.CustomBouquetWhereInput[]
   price?: Prisma.FloatFilter<"CustomBouquet"> | number
   quantity?: Prisma.IntFilter<"CustomBouquet"> | number
-  wrapPaper?: Prisma.StringFilter<"CustomBouquet"> | string
-  ribbon?: Prisma.StringFilter<"CustomBouquet"> | string
+  wrapPaper?: Prisma.StringNullableFilter<"CustomBouquet"> | string | null
+  ribbon?: Prisma.StringNullableFilter<"CustomBouquet"> | string | null
+  name?: Prisma.StringNullableFilter<"CustomBouquet"> | string | null
+  imageUrl?: Prisma.StringNullableFilter<"CustomBouquet"> | string | null
+  meta?: Prisma.JsonNullableFilter<"CustomBouquet">
   orderId?: Prisma.StringFilter<"CustomBouquet"> | string
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
   stems?: Prisma.CustomBouquetStemListRelationFilter
@@ -261,8 +287,11 @@ export type CustomBouquetOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
-  wrapPaper?: Prisma.SortOrder
-  ribbon?: Prisma.SortOrder
+  wrapPaper?: Prisma.SortOrderInput | Prisma.SortOrder
+  ribbon?: Prisma.SortOrderInput | Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  meta?: Prisma.SortOrderInput | Prisma.SortOrder
   orderId?: Prisma.SortOrder
   _count?: Prisma.CustomBouquetCountOrderByAggregateInput
   _avg?: Prisma.CustomBouquetAvgOrderByAggregateInput
@@ -278,8 +307,11 @@ export type CustomBouquetScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"CustomBouquet"> | string
   price?: Prisma.FloatWithAggregatesFilter<"CustomBouquet"> | number
   quantity?: Prisma.IntWithAggregatesFilter<"CustomBouquet"> | number
-  wrapPaper?: Prisma.StringWithAggregatesFilter<"CustomBouquet"> | string
-  ribbon?: Prisma.StringWithAggregatesFilter<"CustomBouquet"> | string
+  wrapPaper?: Prisma.StringNullableWithAggregatesFilter<"CustomBouquet"> | string | null
+  ribbon?: Prisma.StringNullableWithAggregatesFilter<"CustomBouquet"> | string | null
+  name?: Prisma.StringNullableWithAggregatesFilter<"CustomBouquet"> | string | null
+  imageUrl?: Prisma.StringNullableWithAggregatesFilter<"CustomBouquet"> | string | null
+  meta?: Prisma.JsonNullableWithAggregatesFilter<"CustomBouquet">
   orderId?: Prisma.StringWithAggregatesFilter<"CustomBouquet"> | string
 }
 
@@ -287,8 +319,11 @@ export type CustomBouquetCreateInput = {
   id?: string
   price: number
   quantity?: number
-  wrapPaper: string
-  ribbon: string
+  wrapPaper?: string | null
+  ribbon?: string | null
+  name?: string | null
+  imageUrl?: string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order: Prisma.OrderCreateNestedOneWithoutCustomBouquetsInput
   stems?: Prisma.CustomBouquetStemCreateNestedManyWithoutCustomBouquetInput
 }
@@ -297,8 +332,11 @@ export type CustomBouquetUncheckedCreateInput = {
   id?: string
   price: number
   quantity?: number
-  wrapPaper: string
-  ribbon: string
+  wrapPaper?: string | null
+  ribbon?: string | null
+  name?: string | null
+  imageUrl?: string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderId: string
   stems?: Prisma.CustomBouquetStemUncheckedCreateNestedManyWithoutCustomBouquetInput
 }
@@ -307,8 +345,11 @@ export type CustomBouquetUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
-  wrapPaper?: Prisma.StringFieldUpdateOperationsInput | string
-  ribbon?: Prisma.StringFieldUpdateOperationsInput | string
+  wrapPaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ribbon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order?: Prisma.OrderUpdateOneRequiredWithoutCustomBouquetsNestedInput
   stems?: Prisma.CustomBouquetStemUpdateManyWithoutCustomBouquetNestedInput
 }
@@ -317,8 +358,11 @@ export type CustomBouquetUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
-  wrapPaper?: Prisma.StringFieldUpdateOperationsInput | string
-  ribbon?: Prisma.StringFieldUpdateOperationsInput | string
+  wrapPaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ribbon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderId?: Prisma.StringFieldUpdateOperationsInput | string
   stems?: Prisma.CustomBouquetStemUncheckedUpdateManyWithoutCustomBouquetNestedInput
 }
@@ -327,8 +371,11 @@ export type CustomBouquetCreateManyInput = {
   id?: string
   price: number
   quantity?: number
-  wrapPaper: string
-  ribbon: string
+  wrapPaper?: string | null
+  ribbon?: string | null
+  name?: string | null
+  imageUrl?: string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderId: string
 }
 
@@ -336,16 +383,22 @@ export type CustomBouquetUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
-  wrapPaper?: Prisma.StringFieldUpdateOperationsInput | string
-  ribbon?: Prisma.StringFieldUpdateOperationsInput | string
+  wrapPaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ribbon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type CustomBouquetUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
-  wrapPaper?: Prisma.StringFieldUpdateOperationsInput | string
-  ribbon?: Prisma.StringFieldUpdateOperationsInput | string
+  wrapPaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ribbon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -365,6 +418,9 @@ export type CustomBouquetCountOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   wrapPaper?: Prisma.SortOrder
   ribbon?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
+  meta?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
 }
 
@@ -379,6 +435,8 @@ export type CustomBouquetMaxOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   wrapPaper?: Prisma.SortOrder
   ribbon?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
 }
 
@@ -388,6 +446,8 @@ export type CustomBouquetMinOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   wrapPaper?: Prisma.SortOrder
   ribbon?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
 }
 
@@ -461,8 +521,11 @@ export type CustomBouquetCreateWithoutOrderInput = {
   id?: string
   price: number
   quantity?: number
-  wrapPaper: string
-  ribbon: string
+  wrapPaper?: string | null
+  ribbon?: string | null
+  name?: string | null
+  imageUrl?: string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stems?: Prisma.CustomBouquetStemCreateNestedManyWithoutCustomBouquetInput
 }
 
@@ -470,8 +533,11 @@ export type CustomBouquetUncheckedCreateWithoutOrderInput = {
   id?: string
   price: number
   quantity?: number
-  wrapPaper: string
-  ribbon: string
+  wrapPaper?: string | null
+  ribbon?: string | null
+  name?: string | null
+  imageUrl?: string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stems?: Prisma.CustomBouquetStemUncheckedCreateNestedManyWithoutCustomBouquetInput
 }
 
@@ -508,8 +574,11 @@ export type CustomBouquetScalarWhereInput = {
   id?: Prisma.StringFilter<"CustomBouquet"> | string
   price?: Prisma.FloatFilter<"CustomBouquet"> | number
   quantity?: Prisma.IntFilter<"CustomBouquet"> | number
-  wrapPaper?: Prisma.StringFilter<"CustomBouquet"> | string
-  ribbon?: Prisma.StringFilter<"CustomBouquet"> | string
+  wrapPaper?: Prisma.StringNullableFilter<"CustomBouquet"> | string | null
+  ribbon?: Prisma.StringNullableFilter<"CustomBouquet"> | string | null
+  name?: Prisma.StringNullableFilter<"CustomBouquet"> | string | null
+  imageUrl?: Prisma.StringNullableFilter<"CustomBouquet"> | string | null
+  meta?: Prisma.JsonNullableFilter<"CustomBouquet">
   orderId?: Prisma.StringFilter<"CustomBouquet"> | string
 }
 
@@ -517,8 +586,11 @@ export type CustomBouquetCreateWithoutStemsInput = {
   id?: string
   price: number
   quantity?: number
-  wrapPaper: string
-  ribbon: string
+  wrapPaper?: string | null
+  ribbon?: string | null
+  name?: string | null
+  imageUrl?: string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order: Prisma.OrderCreateNestedOneWithoutCustomBouquetsInput
 }
 
@@ -526,8 +598,11 @@ export type CustomBouquetUncheckedCreateWithoutStemsInput = {
   id?: string
   price: number
   quantity?: number
-  wrapPaper: string
-  ribbon: string
+  wrapPaper?: string | null
+  ribbon?: string | null
+  name?: string | null
+  imageUrl?: string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderId: string
 }
 
@@ -551,8 +626,11 @@ export type CustomBouquetUpdateWithoutStemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
-  wrapPaper?: Prisma.StringFieldUpdateOperationsInput | string
-  ribbon?: Prisma.StringFieldUpdateOperationsInput | string
+  wrapPaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ribbon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order?: Prisma.OrderUpdateOneRequiredWithoutCustomBouquetsNestedInput
 }
 
@@ -560,8 +638,11 @@ export type CustomBouquetUncheckedUpdateWithoutStemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
-  wrapPaper?: Prisma.StringFieldUpdateOperationsInput | string
-  ribbon?: Prisma.StringFieldUpdateOperationsInput | string
+  wrapPaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ribbon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -569,16 +650,22 @@ export type CustomBouquetCreateManyOrderInput = {
   id?: string
   price: number
   quantity?: number
-  wrapPaper: string
-  ribbon: string
+  wrapPaper?: string | null
+  ribbon?: string | null
+  name?: string | null
+  imageUrl?: string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type CustomBouquetUpdateWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
-  wrapPaper?: Prisma.StringFieldUpdateOperationsInput | string
-  ribbon?: Prisma.StringFieldUpdateOperationsInput | string
+  wrapPaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ribbon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stems?: Prisma.CustomBouquetStemUpdateManyWithoutCustomBouquetNestedInput
 }
 
@@ -586,8 +673,11 @@ export type CustomBouquetUncheckedUpdateWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
-  wrapPaper?: Prisma.StringFieldUpdateOperationsInput | string
-  ribbon?: Prisma.StringFieldUpdateOperationsInput | string
+  wrapPaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ribbon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stems?: Prisma.CustomBouquetStemUncheckedUpdateManyWithoutCustomBouquetNestedInput
 }
 
@@ -595,8 +685,11 @@ export type CustomBouquetUncheckedUpdateManyWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
-  wrapPaper?: Prisma.StringFieldUpdateOperationsInput | string
-  ribbon?: Prisma.StringFieldUpdateOperationsInput | string
+  wrapPaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ribbon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 
@@ -636,6 +729,9 @@ export type CustomBouquetSelect<ExtArgs extends runtime.Types.Extensions.Interna
   quantity?: boolean
   wrapPaper?: boolean
   ribbon?: boolean
+  name?: boolean
+  imageUrl?: boolean
+  meta?: boolean
   orderId?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   stems?: boolean | Prisma.CustomBouquet$stemsArgs<ExtArgs>
@@ -648,6 +744,9 @@ export type CustomBouquetSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   quantity?: boolean
   wrapPaper?: boolean
   ribbon?: boolean
+  name?: boolean
+  imageUrl?: boolean
+  meta?: boolean
   orderId?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customBouquet"]>
@@ -658,6 +757,9 @@ export type CustomBouquetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   quantity?: boolean
   wrapPaper?: boolean
   ribbon?: boolean
+  name?: boolean
+  imageUrl?: boolean
+  meta?: boolean
   orderId?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customBouquet"]>
@@ -668,10 +770,13 @@ export type CustomBouquetSelectScalar = {
   quantity?: boolean
   wrapPaper?: boolean
   ribbon?: boolean
+  name?: boolean
+  imageUrl?: boolean
+  meta?: boolean
   orderId?: boolean
 }
 
-export type CustomBouquetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "price" | "quantity" | "wrapPaper" | "ribbon" | "orderId", ExtArgs["result"]["customBouquet"]>
+export type CustomBouquetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "price" | "quantity" | "wrapPaper" | "ribbon" | "name" | "imageUrl" | "meta" | "orderId", ExtArgs["result"]["customBouquet"]>
 export type CustomBouquetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   stems?: boolean | Prisma.CustomBouquet$stemsArgs<ExtArgs>
@@ -694,8 +799,11 @@ export type $CustomBouquetPayload<ExtArgs extends runtime.Types.Extensions.Inter
     id: string
     price: number
     quantity: number
-    wrapPaper: string
-    ribbon: string
+    wrapPaper: string | null
+    ribbon: string | null
+    name: string | null
+    imageUrl: string | null
+    meta: runtime.JsonValue | null
     orderId: string
   }, ExtArgs["result"]["customBouquet"]>
   composites: {}
@@ -1127,6 +1235,9 @@ export interface CustomBouquetFieldRefs {
   readonly quantity: Prisma.FieldRef<"CustomBouquet", 'Int'>
   readonly wrapPaper: Prisma.FieldRef<"CustomBouquet", 'String'>
   readonly ribbon: Prisma.FieldRef<"CustomBouquet", 'String'>
+  readonly name: Prisma.FieldRef<"CustomBouquet", 'String'>
+  readonly imageUrl: Prisma.FieldRef<"CustomBouquet", 'String'>
+  readonly meta: Prisma.FieldRef<"CustomBouquet", 'Json'>
   readonly orderId: Prisma.FieldRef<"CustomBouquet", 'String'>
 }
     
